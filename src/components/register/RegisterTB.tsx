@@ -1,6 +1,6 @@
 import React from "react"
 import FormReg from "./FormReg";
-import LoginReg from "../LoginReg";
+import LoginReg from "./LoginReg";
 
 export default function RegTB() {
     return (

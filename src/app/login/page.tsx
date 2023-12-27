@@ -1,5 +1,4 @@
-import LogoHF from '../../components/register/logoHFscreen';
-import RegTB from '@/components/register/RegisterTB';
+import LogoHF from '@/components/register/LogoHFscreen';
 
 export default function Page(){
     return (
