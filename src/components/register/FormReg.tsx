@@ -8,14 +8,16 @@ export default function FormReg() {
                 <input
                     type="text"
                     id="name"
-                    className="border border-gray-300 bg-gray-200 focus:bg-white focus:ring-2 focus:ring-purple-600 text-gray-900 appearance-none inline-block w-full rounded py-2 px-4 focus:outline-none shadow-inner" placeholder="Nome de usuário"
+                    className="border border-gray-300 bg-gray-200 focus:bg-white focus:ring-2 focus:ring-purple-600 text-gray-900 appearance-none inline-block w-full rounded py-2 px-4 focus:outline-none shadow-inner" 
+                    placeholder="Nome de usuário"
                 /></label>
             <div className="flex flex-col pt-3 pb-3">
                 <label for="email">
                     <input
                         type="email"
                         id="email"
-                        className="border border-gray-300 bg-gray-200 focus:bg-white focus:ring-2 focus:ring-purple-600 text-gray-900 appearance-none inline-block w-full rounded py-2 px-4 focus:outline-none shadow-inner" placeholder="Email"
+                        className="border border-gray-300 bg-gray-200 focus:bg-white focus:ring-2 focus:ring-purple-600 text-gray-900 appearance-none inline-block w-full rounded py-2 px-4 focus:outline-none shadow-inner"
+                        placeholder="Email"
                     /></label>
             </div>
             <div className="flex flex-col pb-4">
@@ -23,7 +25,11 @@ export default function FormReg() {
                     <input
                         type="password"
                         id="psswd"
-                        className="border border-gray-300 bg-gray-200 focus:bg-white focus:ring-2 focus:ring-purple-600 text-gray-900 appearance-none inline-block w-full rounded py-2 px-4 focus:outline-none shadow-inner" placeholder="Senha"
+                        className="border border-gray-300 bg-gray-200 focus:bg-white focus:ring-2 focus:ring-purple-600 text-gray-900 appearance-none inline-block w-full rounded py-2 px-4 focus:outline-none shadow-inner" 
+                        placeholder="Senha"
+                        minlength="4"
+                        maxlength="12"
+                        size="12" required
                     /></label>
             </div>
 
