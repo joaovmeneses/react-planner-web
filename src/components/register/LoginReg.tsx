@@ -8,16 +8,21 @@ export default function LoginReg() {
                 <Link href='/login' className='pl-1 text-purple-700 hover:text-purple-900 font-semibold hover:font-extrabold'>Entre</Link>
             </div>
 
-            <hr></hr>
-            <h6 className='text-center text-base text-gray-500 py-2'>
-                ou
-            </h6>
-            <hr></hr>
+            <div className='w-full flex flex-row justify-center'>
+                <hr className='bg-black' />
+                <div>
+                    <h6 className='text-center text-base text-gray-500 py-2'>
+                        ou
+                    </h6>
+                </div>
+                <hr />
+            </div>
+
 
             <div className='space-y-2'>
                 <button
                     type="button"
-                    onClick="window.location.href='https://www.exemplo.com';"
+                    // onClick="window.location.href='https://www.exemplo.com';"
                     className="flex fle-row justify-center rounded-lg bg-gray-700 w-full hover:bg-gray-800"
                 >
                     <img src="./img/icons/ggle.png" alt="Conecte-se com o Google" className='h-7 pt-1' />
@@ -28,7 +33,7 @@ export default function LoginReg() {
 
                 <button
                     type="button"
-                    onClick="window.location.href='https://www.exemplo.com';"
+                    // onClick="window.location.href='https://www.exemplo.com';"
                     className="flex fle-row justify-center rounded-lg bg-gray-700 w-full hover:bg-gray-800"
                 >
                     <img src="./img/icons/fcbk.png" alt="Conecte-se com o Facebook" className='h-7 pt-1 pl-5' />
