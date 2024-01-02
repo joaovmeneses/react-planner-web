@@ -46,7 +46,7 @@ export default function FormReg() {
               className="text-purple-700 hover:text-purple-900 text-bold text-sm"
             >
               {" "}
-              Termos e <br /> Políticas de Privacidade.
+              Termos e Políticas de Privacidade.
             </Link>
           </h6>
         </div>
