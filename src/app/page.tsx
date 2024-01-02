@@ -3,10 +3,11 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="flex flex-row">      
-    <Link href='/register'>
-      Register
-    </Link>
+    <main className='flex flex-col justify-center bg-blue-600'>
+      <Link href='/register'>
+        Register
+      </Link>
+
     </main>
   )
 }

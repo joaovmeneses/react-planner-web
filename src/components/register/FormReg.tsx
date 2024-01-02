@@ -35,7 +35,7 @@ export default function FormReg() {
 
             <div>
                 <h6 className="text-gray-500 text-sm text-center">Ao se cadastrar, você concorda com os
-                    <Link href='/login' className='text-purple-700 hover:text-purple-900 text-bold text-sm'> Termos e <br /> Políticas de Privacidade.</Link>
+                    <Link href='/login' className='text-purple-700 hover:text-purple-900 text-bold text-sm'> Termos e  Políticas de Privacidade.</Link>
                 </h6>
             </div>
 
