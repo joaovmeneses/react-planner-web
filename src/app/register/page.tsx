@@ -1,11 +1,11 @@
-import LogoHF from "@/components/register/LogoHFscreen";
-import RegTB from "@/components/register/RegisterTB";
+import LogoS from "@/components/register/LogoScreen";
+import RegScreen from "@/components/register/RegisterScreen";
 
 export default function Page() {
   return (
     <div className="flex flex-row">
-      <LogoHF />
-      <RegTB />
+      <LogoS />
+      <RegScreen />
     </div>
   );
 }
