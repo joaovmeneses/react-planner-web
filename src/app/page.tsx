@@ -5,8 +5,8 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main className="flex flex-row">
-      {/* <Link href="/register">Register</Link> */}
-      <Content/>
+      <Link href="/register">Register</Link>
+      <Link href="/site">Site</Link>
     </main>
   );
 }

@@ -8,7 +8,7 @@ export default function Content() {
   const [ocultarOpcoesEdital, setMostrarOpcoesEdital] = useState(true);
 
   return (
-    <section className="w-64 bg-purple-600 h-screen">
+    <section className="w-64 bg-purple-600 h-full">
       <div className="pt-14">
         <h2 className="pl-11 mb-10 text-gray-300">PÁGINAS</h2>
         <div>
@@ -17,12 +17,12 @@ export default function Content() {
             Início
           </Button>
           <hr />
-          <div className={ocultarOpcoesCiclos ? "" : "flex flex-col bg-purple-800 px-4"}>
-            <div className="flex gap-24">
+          <div className={ocultarOpcoesCiclos ? "" : "flex flex-col bg-purple-800"}>
+            <div className="flex justify-between">
               <Button image="./img/menu/circle.svg">
                 Ciclos
               </Button>
-                <button onClick={() => setMostrarOpcoesCiclos(!ocultarOpcoesCiclos)}>
+                <button className="pr-4" onClick={() => setMostrarOpcoesCiclos(!ocultarOpcoesCiclos)}>
                   {ocultarOpcoesCiclos?<img src="/img/menu/down-arrow.svg" alt="" />:<img src="/img/menu/right-arrow.svg" alt="" />}
                 </button>
             </div>
@@ -34,12 +34,12 @@ export default function Content() {
             </Button>
           </div>
           <hr />
-          <div className={ocultarOpcoesEdital ? "" : "flex flex-col bg-purple-800 px-4"}>
-            <div className="flex gap-24">
+          <div className={ocultarOpcoesEdital ? "" : "flex flex-col bg-purple-800"}>
+            <div className="flex justify-between">
               <Button image="./img/menu/file.svg">
                 Edital
               </Button>
-                <button onClick={() => setMostrarOpcoesEdital(!ocultarOpcoesEdital)}>
+                <button className="pr-4" onClick={() => setMostrarOpcoesEdital(!ocultarOpcoesEdital)}>
                   {ocultarOpcoesEdital?<img src="/img/menu/down-arrow.svg" alt="" />:<img src="/img/menu/right-arrow.svg" alt="" />}
                 </button>
             </div>
