@@ -5,8 +5,6 @@ export default function Home() {
     <main className="flex flex-col justify-center bg-blue-600">
       <Link href="/register">Register</Link>
       <Link href="/site">Site</Link>
-      <Link href="/test_timer">TEST</Link>
-
     </main>
   );
 }
