@@ -4,11 +4,11 @@ export default function Layout({children}:{children: React.ReactNode;}){
     return(
         <div className="h-screen">
             
-            <div className="flex h-full">
+            <div className="flex h-full w-screen">
                 <Content/>
-                <div className="flex flex-col ">
+                <div className="flex flex-col w-10/12">
                     {/* Colocoar aqui o Header */}
-                    <div className="mt-64 ml-64 flex justify-center items-center w-full">{children}</div>
+                    <div className="h-full bg-gray-100">{children}</div>
                 </div>
             </div>
         </div>
