@@ -1,17 +1,17 @@
 "use client"
 
-import Cicle from "@/components/my-cicles/Cicle";
-import CicleProps from "@/interfaces/Cicle";
+import Cicle from "@/components/my-cycles/Cycle";
+import CicleProps from "@/interfaces/Cycle";
 import { useState } from "react"
 
 export default function MeusCiclos(){
 
-const [myCicles,setMyCicles] = useState<CicleProps[]>([{id: "1", title:"Cicle 1"},
+const [myCycles,setMyCycles] = useState<CicleProps[]>([{id: "1", title:"Cicle 1"},
 {id: "2", title:"Cicle 2"},{id: "3", title:"Cicle 3"},
 {id: "4", title:"Cicle 4"}]);
 
-const handleDeleteCicle = (id: string) => {
-    setMyCicles(prevCicles => prevCicles.filter(cicle => cicle.id !== id));
+const handleDeleteCycle = (id: string) => {
+    setMyCycles(prevCycles => prevCycles.filter(cycle => cycle.id !== id));
 };
 
     return(
@@ -21,8 +21,8 @@ const handleDeleteCicle = (id: string) => {
                 <p className="w-1/2 text-center">NOME</p>
                 <p className="w-1/2 text-center">AÇÕES</p>
             </div>
-            {myCicles.map((myCicle)=>(
-                <Cicle key={myCicle.id} id={myCicle.id} title={myCicle.title} onDelete={handleDeleteCicle}/>
+            {myCycles.map((myCycle)=>(
+                <Cicle key={myCycle.id} id={myCycle.id} title={myCycle.title} onDelete={handleDeleteCycle}/>
             ))}
         </section>
     )

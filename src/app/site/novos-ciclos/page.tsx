@@ -1,8 +1,8 @@
 "use client";
 
-import Button from "@/components/menu/Button";
-import Card from "@/components/new cicle/Card";
+import Card from "@/components/new cycle/Card";
 import { ChangeEvent, useState } from "react";
+import Link from "next/link";
 
 export default function NovosCiclos() {
   const [inputValue, setInputValue] = useState("");
@@ -40,9 +40,11 @@ export default function NovosCiclos() {
           title="Ciclo por Curso"
           text="Lorem ipsum dolor sit amet consectetur adipisicing elit. Natus dolore rem qui officiis repellat? Voluptatum sit beatae animi cum, laudantium eveniet harum blanditiis exercitationem vel quia commodi veniam neque dolores?"
         >
+        <Link href={"/site/novos-ciclos/por-concurso"}>
           <button className="bg-[#CB55FF] text-center text-xs rounded w-full py-2 px-3">
-            Começar
+              Começar
           </button>
+        </Link>
         </Card>
       </div>
     </section>
