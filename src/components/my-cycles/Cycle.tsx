@@ -1,10 +1,10 @@
 "use client"
 
-import CicleProps from "@/interfaces/Cicle";
+import CycleProps from "@/interfaces/Cycle";
 import ModalDelete from "./ModalDelete";
 import { useState } from "react";
 
-const Cicle: React.FC<CicleProps & {onDelete: (id:string) => void}> = ({title,id,onDelete}) =>{
+const Cycle: React.FC<CycleProps & {onDelete: (id:string) => void}> = ({title,id,onDelete}) =>{
 
     const [modalDelete,setModalDelete] = useState(false);
 
@@ -22,10 +22,10 @@ const Cicle: React.FC<CicleProps & {onDelete: (id:string) => void}> = ({title,id
             <p className="w-1/2 text-center">{title}</p>
             <div className="flex justify-center w-1/2 gap-5">
                 <button>
-                    <img src="/img/my-cicles/icon _play_green.png" alt="botão de play" />
+                    <img src="/img/my-cycles/icon _play_green.png" alt="botão de play" />
                 </button>
                 <button onClick={onClose}>
-                    <img src="/img/my-cicles/icon _trash.png" alt="botão de eliminar ciclo" />
+                    <img src="/img/my-cycles/icon _trash.png" alt="botão de eliminar ciclo" />
                 </button>
             </div>
             {modalDelete &&(
@@ -35,4 +35,4 @@ const Cicle: React.FC<CicleProps & {onDelete: (id:string) => void}> = ({title,id
     )
 }
 
-export default Cicle;
+export default Cycle;

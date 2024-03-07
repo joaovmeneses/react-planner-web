@@ -1,5 +1,5 @@
-@tailwind base;
 @tailwind components;
+@tailwind base;
 @tailwind utilities;
 
 :root {
@@ -17,8 +17,8 @@
 }
 
 body {
-  font-family: 'Montserrat', sans-serif;
   color: rgb(var(--foreground-rgb));
+  font-family: "Montserrat", sans-serif;
   background: linear-gradient(
       to bottom,
       transparent,
