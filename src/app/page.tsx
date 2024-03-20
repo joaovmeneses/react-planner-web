@@ -1,10 +1,7 @@
-import Link from "next/link";
+import LoginPage from "./login/page";
 
 export default function Home() {
   return (
-    <main className="flex flex-col justify-center bg-blue-600">
-      <Link href="/register">Register</Link>
-      <Link href="/site">Site</Link>
-    </main>
+    <LoginPage/>
   );
 }
