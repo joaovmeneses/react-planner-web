@@ -17,11 +17,11 @@ const ModalError: React.FC<ModalErrorProps> = ({ error, handleClose }) => {
       shouldCloseOnOverlayClick={true}
     >
       <div className="flex flex-col items-center bg-purple-500 rounded-lg p-8 max-w-md">
-        <h3 className="text-xl mb-4">Erro</h3>
+        <h3 className="text-xl w-full text-center mr-1 mb-4">Erro</h3>
         <p className="mb-4">{error}</p>
         <div className="flex justify-end">
           <button
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-900 mr-2"
+            className="px-4 py-2 text-center bg-purple-600 text-white rounded-lg hover:bg-purple-900"
             onClick={handleClose}
           >
             Fechar

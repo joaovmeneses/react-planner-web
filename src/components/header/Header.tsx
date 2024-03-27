@@ -2,12 +2,25 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Header(){
+
+    const router = useRouter();
     
     const [ocultarUsuario, setOcultarUsuario] = useState(true);
+    let email;
+    if (typeof window !== 'undefined') {
+        email = localStorage.getItem("email");
+      }
 
-
+    const logout = () => {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem("token");
+            localStorage.removeItem("email");
+            router.push("/");
+        }
+    }
 
     return(
         <div className="flex flex-col items-end mx-6 mt-6">
@@ -27,7 +40,7 @@ export default function Header(){
                     <img src="/img/header/user_white.svg" alt="Icone de usuário" className="pt-2" />
                     <div className="h-8">
                         <p className="text-lg">Nome</p>
-                        <p className="text-xs">Email</p>
+                        <p className="text-xs">{email}</p>
                     </div>
                 </div>
                 <hr className=" border border-[#939393]"/>
@@ -37,7 +50,7 @@ export default function Header(){
                     <button className="flex justify-start">Meus Planos</button>
                     <button className="flex justify-start">Ajuda</button>
                     <button className="flex justify-start">Política de privacidade</button>
-                    <button className="flex justify-start"><Link href={"/"}>Sair</Link></button>
+                    <button onClick={logout} className="flex justify-start">Sair</button>
                 </div>
             </div>
         </div>
