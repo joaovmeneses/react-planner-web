@@ -1,8 +1,7 @@
 "use client"
 
 import React from "react";
-import Link from "next/link";
-import axios from "axios";
+import api from "../../../axiosConfig";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ModalError from '../shared/ModalError';
@@ -18,12 +17,11 @@ export default function FormLog() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = { email, password };
-    axios
-      .post("http://ec2-3-85-125-196.compute-1.amazonaws.com:3000/auth/login", data)
+    api
+      .post("/auth/login", data)
       .then((response) => {
-        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("token", response.data.access_token);
         localStorage.setItem("email",email);
-        console.log(response.data);
         router.push("/site/meus-ciclos");
       })
       .catch((error) => {
