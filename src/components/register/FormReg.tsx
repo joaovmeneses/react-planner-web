@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import axios from "axios";
+import api from "../../../axiosConfig";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ModalError from "@/components/shared/ModalError";
@@ -19,8 +19,8 @@ export default function FormReg() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = { email, name, password };
-    axios
-      .post("http://ec2-3-85-125-196.compute-1.amazonaws.com:3000/auth/register", data)
+    api
+      .post("/auth/register", data)
       .then((response) => {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("email", email);

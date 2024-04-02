@@ -2,13 +2,33 @@
 
 import Cicle from "@/components/my-cycles/Cycle";
 import CicleProps from "@/interfaces/Cycle";
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import api from "../../../../axiosConfig";
 
 export default function MeusCiclos(){
 
-const [myCycles,setMyCycles] = useState<CicleProps[]>([{id: "1", title:"Cicle 1"},
-{id: "2", title:"Cicle 2"},{id: "3", title:"Cicle 3"},
-{id: "4", title:"Cicle 4"}]);
+const [myCycles,setMyCycles] = useState<CicleProps[]>([]);
+
+useEffect (() => {
+    const data = async () =>{
+        try{
+            const token = localStorage.getItem("token");
+            const response = await api.get("/ciclo",
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+
+            });
+            setMyCycles(response.data);
+        }
+        catch(error){
+            console.log(error);
+        }
+    }
+    data();
+},[])
+
 
 const handleDeleteCycle = (id: string) => {
     setMyCycles(prevCycles => prevCycles.filter(cycle => cycle.id !== id));
@@ -22,7 +42,7 @@ const handleDeleteCycle = (id: string) => {
                 <p className="w-1/2 text-center">AÇÕES</p>
             </div>
             {myCycles.map((myCycle)=>(
-                <Cicle key={myCycle.id} id={myCycle.id} title={myCycle.title} onDelete={handleDeleteCycle}/>
+                <Cicle key={myCycle.id} id={myCycle.id} nome={myCycle.nome} onDelete={handleDeleteCycle}/>
             ))}
         </section>
     )
