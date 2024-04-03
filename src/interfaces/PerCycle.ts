@@ -1,89 +1,31 @@
-export interface Affinity{
-    id: string;
-    name: string;
-    level: "Iniciante" | "Intermediário" | "Avançado" | null;
+
+
+export interface Disciplinas{
+    afinidade: "basico" | "intermediario" | "avancado" | null;
+    nome: string;
+    peso: number;
+    qtd_questoes: number;
 }
 
 export interface Position{
-    id: string;
-    name: string;
-    affinies: Affinity[];
+    qtd_questoes: number;
+    nome: string;
+    disciplinas: Disciplinas[];
 }
 
 export interface Contest{
-    id: string;
-    name:string;
-    positions: Position[];
+    _id: string;
+    nome:string;
 }
 
-export const initialAffinities: Affinity[] = [
-    {
-      id: '1',
-      name: 'Portugues',
-      level: null
-    },
-    {
-        id: '2',
-        name: 'Matemática',
-        level: null
-      },
-      {
-        id: '3',
-        name: 'Programação',
-        level: null
-      },
-      {
-        id: '4',
-        name: 'Estadística',
-        level: null
-      },
-      {
-        id: '5',
-        name: 'Química',
-        level: null
-      },
-      {
-        id: '6',
-        name: 'Redação',
-        level: null
-      },
-  ];
+export interface CicloData {
+  nome: string;
+  horas_por_ciclo: number;
+  usuario_ref: string | undefined;
+  qtd_total_questoes: number | undefined;
+  disciplinas: Disciplinas[];
+}
 
-  export const initialPositions: Position[] = [
-    {
-      id: '1',
-      name: 'Cargo 1',
-      affinies: [initialAffinities[2], initialAffinities[3], initialAffinities[5]]
-    },
-    {
-      id: '2',
-      name: 'Cargo 2',
-      affinies: [initialAffinities[2], initialAffinities[5]]
-    },
-    {
-        id: '3',
-        name: 'Cargo 3',
-        affinies: [initialAffinities[1], initialAffinities[5]]
-      },
-      {
-        id: '4',
-        name: 'Cargo 4',
-        affinies: [initialAffinities[3], initialAffinities[4]]
-      }
-  ];
-
-export const initialContests: Contest[] = [
-    {
-      id: '1',
-      name: 'Concurso 1',
-      positions: initialPositions.slice(0,2)
-    },
-    {
-      id: '2',
-      name: 'Concurso 2',
-      positions: initialPositions.slice(2,4)
-    }
-  ];
 
 
 

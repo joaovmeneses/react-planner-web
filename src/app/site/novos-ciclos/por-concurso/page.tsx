@@ -4,31 +4,61 @@ import StageLogo from "@/components/new cycle/per contest/StageLogo"
 import StageText from "@/components/new cycle/per contest/StageText"
 import ContestComponent from "@/components/new cycle/per contest/Contest"
 import { useState } from "react"
-import { Affinity, Contest, Position } from "@/interfaces/PerCycle"
+import { useRouter } from "next/navigation";
+import { Disciplinas, Contest, Position, CicloData } from "@/interfaces/PerCycle"
 import PositionComponent from "@/components/new cycle/per contest/Position"
 import NameComponent from "@/components/new cycle/per contest/Name"
 import AffinityComponent from "@/components/new cycle/per contest/Affinity"
+import { getPosition, postCiclo } from "@/services/novosCiclos"
 
 export default function PorConcurso(){
 
+    const router = useRouter();
+
     const [contest,setContest] = useState<Contest>();
+    const [positions,setPositions] = useState<Position[]>();
     const [position,setPosition] = useState<Position>();
-    const [cycleName,setcycleName] = useState<string>();
-    const [affinities,setAffinities] = useState<Affinity[]>();
+    const [cycleName,setcycleName] = useState<string>('');
+    const [affinities,setAffinities] = useState<Disciplinas[]>();
     const [stage,setStage] = useState<number>(1);
 
-    const handleContest = (contest:Contest,stage:number)=>{
+    const handleContest = async (contest:Contest,stage:number)=>{
         setContest(contest);
         setStage(stage);
+
+        // const positionData = await getPosition("8605e720-7c91-11ee-bfe8-4747c8a90356");
+        const positionData = await getPosition(contest._id);
+        setPositions(positionData);
     }
 
     const handlePosition = (position:Position,stage:number)=>{
         setPosition(position);
         setStage(stage);
+
+        const disciplinasTransformadas = position.disciplinas.map(disciplina => ({
+            ...disciplina,
+            afinidade: null
+        }));
+
+        console.log(disciplinasTransformadas);
+        setAffinities(disciplinasTransformadas);
     }
 
-    const handleAffinities = (affinities:Affinity[])=>{
-        setAffinities(affinities);
+    const handleAffinities = async (affinities:Disciplinas[])=>{
+        const cicloData:CicloData = {
+            nome: cycleName,
+            qtd_total_questoes: position?.qtd_questoes,
+            usuario_ref: "8605e720-7c91-11ee-bfe8-4747c8a90356",
+            horas_por_ciclo: 24,
+            disciplinas: affinities
+        }
+
+        const ciclo = await postCiclo(cicloData,contest?._id).then(()=>{
+            router.push("/site/meus-ciclos")
+        }).catch(error =>{
+            alert("Erro ao criar ciclo");
+        });
+
     }
 
     const handleName = (name:string,stage:number) =>{
@@ -81,13 +111,13 @@ export default function PorConcurso(){
                     <ContestComponent onSelect={handleContest} stage={stage}/>
                 )}
                 {stage===2&&(
-                    <PositionComponent onSelect={handlePosition} onBack={onBack} stage={stage} positions={contest?.positions || []}/>
+                    <PositionComponent onSelect={handlePosition} onBack={onBack} stage={stage} positions={positions}/>
                 )}
                 {stage===3&&(
                     <NameComponent onSelect={handleName} onBack={onBack} stage={stage}/>
                 )}
                 {stage===4&&(
-                    <AffinityComponent onSelect={handleAffinities} onBack={onBack} stage={stage} affinities={position?.affinies || []}/>
+                    <AffinityComponent onSelect={handleAffinities} onBack={onBack} stage={stage} affinities={affinities || []}/>
                 )}
             </div>
         </section>

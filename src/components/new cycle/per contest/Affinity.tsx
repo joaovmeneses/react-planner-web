@@ -1,28 +1,28 @@
 "use client"
 
 import React, { useState } from "react"
-import { Affinity } from "@/interfaces/PerCycle"
+import { Disciplinas } from "@/interfaces/PerCycle"
 import Subject from "./Subject"
 
 interface AffinityComponentProps{
-    onSelect: (selectedAffinities: Affinity[]) => void;
+    onSelect: (selectedAffinities: Disciplinas[]) => void;
     onBack: (stage:number) => void;
     stage: number;
-    affinities: Affinity[];
+    affinities: Disciplinas[];
 }
 
 const AffinityComponent: React.FC<AffinityComponentProps> = ({onSelect,onBack,stage,affinities}) =>{
 
     const [isSelectionValid, setIsSelectionValid] = useState<boolean>(false);
-    const [selectedAffinities,setSelectedAffinities] = useState<Affinity[]>(affinities)
+    const [selectedAffinities,setSelectedAffinities] = useState<Disciplinas[]>(affinities)
 
-    const handleUpdateAffinity = (updatedAffinity: Affinity) => {
+    const handleUpdateAffinity = (updatedAffinity: Disciplinas) => {
         const updatedAffinities = selectedAffinities.map((affinity) =>
-          affinity.id === updatedAffinity.id ? updatedAffinity : affinity
+          affinity.nome === updatedAffinity.nome ? updatedAffinity : affinity
         );
         setSelectedAffinities(updatedAffinities);
         
-        const isValid = updatedAffinities.every((affinity) => affinity.level !== null);
+        const isValid = updatedAffinities.every((affinity) => affinity.afinidade !== null);
         setIsSelectionValid(isValid);
       };
 
@@ -50,7 +50,6 @@ const AffinityComponent: React.FC<AffinityComponentProps> = ({onSelect,onBack,st
                 </div>
                 {affinities.map((affinity, index) => (
                     <Subject
-                    key={affinity.id}
                     index={index}
                     affinity={affinity}
                     onUpdateAffinity={handleUpdateAffinity}
