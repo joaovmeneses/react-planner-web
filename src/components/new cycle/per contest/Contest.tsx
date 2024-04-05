@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Contest } from "@/interfaces/PerCycle"
-import { initialContests } from "@/interfaces/PerCycle"
+import { getContest } from "@/services/novosCiclos"
 
 interface ContestComponentProps{
     onSelect: (contest:Contest,stage:number) => void;
@@ -12,13 +12,21 @@ interface ContestComponentProps{
 const ConstestComponent: React.FC<ContestComponentProps> = ({onSelect,stage}) =>{
 
     const [option,setOption] = useState<string>("");
-    const [contests,setContests] = useState<Contest[]>(initialContests);
+    const [contests,setContests] = useState<Contest[]>([]);
     const [contest,setContest] = useState<Contest>()
 
+    useEffect(()=>{
+        async function fetchData(){
+            const data = await getContest();
+            setContests(data);
+        }
+        fetchData();
+    },[])
+
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>)=>{
-        const selectedContest = contests.find(contest => contest.id === e.target.value);
+        const selectedContest = contests.find(contest => contest._id === e.target.value);
         if (selectedContest) {
-            setOption(selectedContest.id);
+            setOption(selectedContest._id);
             setContest(selectedContest);
     }
     };
@@ -41,8 +49,8 @@ const ConstestComponent: React.FC<ContestComponentProps> = ({onSelect,stage}) =>
                 >
                     <option value="" disabled hidden></option>
                     {contests.map((contest) => (
-                        <option key={contest.id} value={contest.id}>
-                        {contest.name}
+                        <option key={contest._id} value={contest._id}>
+                        {contest.nome}
                         </option>
                     ))}
                 </select>

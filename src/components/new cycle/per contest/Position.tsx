@@ -7,7 +7,7 @@ interface PositionComponentProps{
     onSelect: (contest:Position,stage:number) => void;
     onBack: (stage:number) => void;
     stage: number;
-    positions: Position[];
+    positions?: Position[];
 }
 
 const PositionComponent: React.FC<PositionComponentProps> = ({onSelect,onBack,stage,positions}) =>{
@@ -16,9 +16,9 @@ const PositionComponent: React.FC<PositionComponentProps> = ({onSelect,onBack,st
     const [position,setPosition] = useState<Position>()
 
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>)=>{
-        const selectedContest = positions.find(position => position.id === e.target.value);
+        const selectedContest = positions?.find(position => position.nome === e.target.value);
         if (selectedContest) {
-            setOption(selectedContest.id);
+            setOption(selectedContest.nome);
             setPosition(selectedContest);
     }
     };
@@ -39,13 +39,13 @@ const PositionComponent: React.FC<PositionComponentProps> = ({onSelect,onBack,st
             <div className="flex flex-col gap-4 px-10">
                 <h3 className="text-[#5e5873] font-medium text-2xl">Cargo</h3>
                 <select className="bg-white border-2 rounded focus:border-[#a855f7] focus:shadow-[#a855f7] focus:shadow-sm p-2 border-[#dcdbe2] outline-none" 
-                id="dropdown" 
+                id="dropdown"
                 value={option} 
                 onChange={handleSelectChange}>
                     <option value="" disabled hidden></option>
-                    {positions.map((position) =>(
-                        <option key={position.id} value={position.id}>
-                            {position.name}
+                    {positions?.map((position) =>(
+                        <option value={position.nome}>
+                            {position.nome}
                         </option>
                     ))}
                 </select>
