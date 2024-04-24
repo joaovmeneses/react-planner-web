@@ -9,10 +9,6 @@ export default function CardBody({ nome, horasObjetivo, status, id, indice }: { 
     return `${horas}h${minutos}`;
   };
 
-  // fazer o controle do indice e status para o timer
-  // carrgar o id para algo?
-  // transformar o card num button para interagir com o timer
-
   return (
     <div className='w-64 h-30 my-2 bg-white ring-2 ring-purple-600 houver:ring-orange-300 rounded-lg text-black-100'>
       <div className='grid pt-8 pb-7'>
