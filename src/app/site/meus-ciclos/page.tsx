@@ -20,7 +20,7 @@ export default function MeusCiclos(){
 
     const [dadosTimer, setDadosTimer] = useState<{ disciplina: string; progressoInicial: number }>({ disciplina: "", progressoInicial: 0 });
 
-    const urlApi: string = "http://ec2-3-85-125-196.compute-1.amazonaws.com:3000";
+    const urlApi: string = "http://ec2-52-91-128-66.compute-1.amazonaws.com:3000";
     const rotaDisciplina: string = "/disciplina/ciclo/:";
     const ciclo_id: string = "ab5c597a-da96-4ee2-85a5-57dfb1db4lfd";
 
