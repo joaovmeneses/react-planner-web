@@ -1,11 +1,17 @@
-// components/Timer.js
 "use client"
 
 import React, { useState, useEffect } from 'react';
 import TimerBar from './TimerBar';
 
-const Timer = ({ materia, progressoInicial }) => {
-  const tempoInicial = progressoInicial !== undefined ? (2 * 60 * 60 - progressoInicial) : 2 * 60 * 60;
+interface TimercardProps {
+  nome: string;
+  horasObjetivo: number;
+  horasEstudadas: number | null;
+  indice: number;
+}
+
+const Timercard: React.FC<TimercardProps> = ({ nome, horasObjetivo, horasEstudadas }: TimercardProps) => {
+  const tempoInicial = horasEstudadas !== null ? (horasObjetivo - horasEstudadas) : horasObjetivo;
   
   const [tempoRestante, setTempoRestante] = useState(tempoInicial);
   const [pausado, setPausado] = useState(true);
@@ -19,7 +25,7 @@ const Timer = ({ materia, progressoInicial }) => {
   };
 
   useEffect(() => {
-    let temporizador;
+    let temporizador: string | number | NodeJS.Timeout | undefined;
 
     if (!pausado && tempoRestante > 0) {
       temporizador = setInterval(() => {
@@ -31,7 +37,7 @@ const Timer = ({ materia, progressoInicial }) => {
   }, [pausado, tempoRestante]);
 
   const calcularPorcentagem = () => {
-    return ((2 * 60 * 60 - tempoRestante) / (2 * 60 * 60)) * 100;
+    return ((horasObjetivo - tempoRestante) / horasObjetivo) * 100;
   };
 
   const timerBarProgres = {
@@ -41,9 +47,9 @@ const Timer = ({ materia, progressoInicial }) => {
   };
 
   return (
-    <div className='w-64 h-48 bg-black rounded-lg text-white'>
+    <div className='w-64 h-48 bg-white rounded-lg text-white'>
+      <h1 className='text-xl text-white pl-4 pt-2'>Cronômetro</h1>
       <div className='grid pt-8 pb-9'>
-        <h1 className='flex justify-center text-2xl'>{materia}</h1>
         <h1 className='flex justify-center text-2xl py-2'>{String(Math.floor(tempoRestante / 3600)).padStart(2, '0')}:{String(Math.floor((tempoRestante % 3600) / 60)).padStart(2, '0')}:{String(tempoRestante % 60).padStart(2, '0')}</h1>
         <div className='flex justify-center w-full'>
           <button className='bg-violet-600 rounded-l-lg px-2 py-1 ring-1 ring-violet-400 hover:bg-violet-700 hover:ring-2 hover:ring-violet-400' onClick={iniciarTimer} disabled={!pausado}>Ligar</button>
@@ -57,4 +63,4 @@ const Timer = ({ materia, progressoInicial }) => {
   );
 };
 
-export default Timer;
+export default Timercard;

@@ -1,49 +1,91 @@
-"use client"
+"use client";
+import Timercard from "@/components/timer/Timer";
+import CardBody from "@/components/my-cycles/cards/CardBody";
+import ListBody from "@/components/my-cycles/list/ListItem";
 
-import Cicle from "@/components/my-cycles/Cycle";
-import CicleProps from "@/interfaces/Cycle";
-import { useState, useEffect } from "react"
-import api from "../../../../axiosConfig";
+import React, { useEffect, useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
+interface Disciplina {
+    id: string;
+    nome: string;
+    horas_objetivo: number;
+    status: string;
+    indice: number;
+}
 
 export default function MeusCiclos(){
 
-const [myCycles,setMyCycles] = useState<CicleProps[]>([]);
+    const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
 
-useEffect (() => {
-    const data = async () =>{
-        try{
-            const token = localStorage.getItem("token");
-            const response = await api.get("/ciclo",
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+    const [dadosTimer, setDadosTimer] = useState<{ disciplina: string; progressoInicial: number }>({ disciplina: "", progressoInicial: 0 });
 
-            });
-            setMyCycles(response.data);
-        }
-        catch(error){
-            console.log(error);
-        }
-    }
-    data();
-},[])
+    const urlApi: string = "http://ec2-52-91-128-66.compute-1.amazonaws.com:3000";
+    const rotaDisciplina: string = "/disciplina/ciclo/:";
+    const ciclo_id: string = "ab5c597a-da96-4ee2-85a5-57dfb1db4lfd";
 
+    const urlCompleta: string = urlApi + rotaDisciplina + ciclo_id;
+    
+    useEffect(() => {
+        const fetchDisciplinas = async () => {
+            try {
+                const response = await fetch(urlCompleta);
+                const data = await response.json();
+                setDisciplinas(data);
+            } catch (error) {
+                console.error("Erro ao buscar dados da API:", error);
+            }
+        };
 
-const handleDeleteCycle = (id: string) => {
-    setMyCycles(prevCycles => prevCycles.filter(cycle => cycle.id !== id));
-};
+        fetchDisciplinas();
+    }, []);
+
+    useEffect(() => {
+        const fetchDadosTimer = async () => {
+            try {
+                const response = await fetch("URL_DA_API_PARA_O_TIMER");
+                const data = await response.json();
+                setDadosTimer(data);
+            } catch (error) {
+                console.error("Erro ao buscar dados do timer da API:", error);
+            }
+        };
+
+        fetchDadosTimer();
+    }, []);
 
     return(
-        <section className="bg-white text-[#67617a] m-6 p-5 rounded">
-            <h2 className="mb-5 text-xl">Meus Ciclos</h2>
-            <div className="flex w-full bg-[#f3f2f7] border-t-2 border-[#eceaf1] py-2 text-sm">
-                <p className="w-1/2 text-center">NOME</p>
-                <p className="w-1/2 text-center">AÇÕES</p>
-            </div>
-            {myCycles.map((myCycle)=>(
-                <Cicle key={myCycle.id} id={myCycle.id} nome={myCycle.nome} onDelete={handleDeleteCycle}/>
-            ))}
-        </section>
+        <div className="flex flex-row w-auto space-x-4">
+        <div className="grid grid-cols-3 rounded-lg w-full bg-white drop-shadow-lg my-3 gap-x-2 gap-y-2 py-3 pl-4">
+            <DragDropContext onDragEnd={() => {}}>
+                <Droppable droppableId="cards" direction="horizontal">
+                    {(provided, snapshot) => (
+                        <>                            
+                            {disciplinas.map((disciplina, index) => (
+                                <CardBody
+                                    key={disciplina.id}
+                                    nome={disciplina.nome}
+                                    horasObjetivo={disciplina.horas_objetivo}
+                                    status={disciplina.status}
+                                    id={disciplina.id}
+                                    indice={index}
+                                />
+                            ))}
+                        </>
+                    )}
+                </Droppable>
+            </DragDropContext>
+        </div>
+    
+
+            <div className="flex flex-col h-full w-80 rounded-lg drop-shadow-lg">
+                <Timercard disciplina={dadosTimer.disciplina} progressoInicial={dadosTimer.progressoInicial}  />
+                <div className="flex flex-col w-full">
+                <DragDropContext onDragEnd={() => {}}>
+                <ListBody />
+                </DragDropContext>
+                </div>
+             </div>
+        </div>
     )
 }
