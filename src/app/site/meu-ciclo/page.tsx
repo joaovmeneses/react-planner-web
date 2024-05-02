@@ -1,30 +1,20 @@
 "use client";
 import Timercard from "@/components/timer/Timer";
-import CardBody from "@/components/my-cycles/cards/CardBody";
-import ListBody from "@/components/my-cycles/list/ListItem";
+import CardBody from "@/components/my-cycle/cards/CardBody";
+import ListBody from "@/components/my-cycle/list/ListItem";
+import MyCycle from "@/interfaces/MyCycle";
 
 import React, { useEffect, useState } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
-interface Disciplina {
-    id: string;
-    nome: string;
-    horas_objetivo: number;
-    status: string;
-    indice: number;
-}
 
 export default function MeusCiclos(){
 
-    const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
+    const [disciplinas, setDisciplinas] = useState<MyCycle[]>([]);
 
     const [dadosTimer, setDadosTimer] = useState<{ disciplina: string; progressoInicial: number }>({ disciplina: "", progressoInicial: 0 });
 
-    const urlApi: string = "http://ec2-52-91-128-66.compute-1.amazonaws.com:3000";
-    const rotaDisciplina: string = "/disciplina/ciclo/:";
-    const ciclo_id: string = "ab5c597a-da96-4ee2-85a5-57dfb1db4lfd";
-
-    const urlCompleta: string = urlApi + rotaDisciplina + ciclo_id;
+    const urlCompleta: string = "http://ec2-52-91-128-66.compute-1.amazonaws.com:3000/disciplina/ciclo/ab5c597a-da96-4ee2-85a5-57dfb1db4lfd";
     
     useEffect(() => {
         const fetchDisciplinas = async () => {
@@ -38,20 +28,6 @@ export default function MeusCiclos(){
         };
 
         fetchDisciplinas();
-    }, []);
-
-    useEffect(() => {
-        const fetchDadosTimer = async () => {
-            try {
-                const response = await fetch("URL_DA_API_PARA_O_TIMER");
-                const data = await response.json();
-                setDadosTimer(data);
-            } catch (error) {
-                console.error("Erro ao buscar dados do timer da API:", error);
-            }
-        };
-
-        fetchDadosTimer();
     }, []);
 
     return(
