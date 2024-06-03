@@ -80,28 +80,31 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = { email, password };
+    event.preventDefault()
+    const data = { email, password }
     api
-      .post("/auth/login", data)
-      .then((response) => {
-        localStorage.setItem("token", response.data.access_token);
-        localStorage.setItem("email",email);
-        router.push("/home");
+      .post('/auth/login', data)
+      .then(response => {
+        localStorage.setItem('token', response.data.access_token)
+        localStorage.setItem('email', email)
+        router.push('/home')
       })
-      .catch((error) => {
-        if (error.response && error.response.status === 400 && error.response.data.message === "Senha incorreta.") {
-          setError("Email ou senha errado.");
+      .catch(error => {
+        if (error.response && error.response.status === 400 && error.response.data.message === 'Senha incorreta.') {
+          setError('Email ou senha errado.')
+        } else if (
+          error.response &&
+          error.response.status === 404 &&
+          error.response.data.message === 'Usuário não cadastrado.'
+        ) {
+          setError('Email ou senha errado.')
         }
-        else if(error.response && error.response.status === 404 && error.response.data.message === "Usuário não cadastrado.") {
-          setError("Email ou senha errado.");
-        }
-      });
+      })
   }
 
   const characterIllustration = useImageVariant(
@@ -115,7 +118,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   const handleClose = () => {
-    setError("");
+    setError('')
   }
 
   return (
@@ -146,14 +149,13 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
             <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}! 👋🏻`}</Typography>
             <Typography>Please sign-in to your account and start the adventure</Typography>
           </div>
-          <form
-            noValidate
-            autoComplete='off'
-            onSubmit={handleSubmit}
-            className='flex flex-col gap-5'
-          >
-            <CustomTextField autoFocus fullWidth label='Email or Username' placeholder='Enter your email or username' 
-              onChange={(event:React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
+          <form noValidate autoComplete='off' onSubmit={handleSubmit} className='flex flex-col gap-5'>
+            <CustomTextField
+              autoFocus
+              fullWidth
+              label='Email or Username'
+              placeholder='Enter your email or username'
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
             />
             <CustomTextField
               fullWidth
@@ -161,11 +163,15 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
               placeholder='············'
               id='outlined-adornment-password'
               type={isPasswordShown ? 'text' : 'password'}
-              onChange={(event:React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position='end'>
-                    <IconButton edge='end' onClick={handleClickShowPassword} onMouseDown={(e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => e.preventDefault()}>
+                    <IconButton
+                      edge='end'
+                      onClick={handleClickShowPassword}
+                      onMouseDown={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => e.preventDefault()}
+                    >
                       <i className={isPasswordShown ? 'tabler-eye-off' : 'tabler-eye'} />
                     </IconButton>
                   </InputAdornment>
@@ -205,7 +211,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
           </form>
         </div>
       </div>
-      <ModalError error={error} handleClose={handleClose}/>
+      <ModalError error={error} handleClose={handleClose} />
     </div>
   )
 }
