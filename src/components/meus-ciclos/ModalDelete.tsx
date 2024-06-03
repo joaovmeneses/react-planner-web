@@ -10,10 +10,8 @@ interface ModalProps {
 }
 
 const ModalDelete = ({ onClose, onSubmit, id }: ModalProps) => {
-  // ajustar a responsividade do modal
   const [windowOrientation, setWindowOrientation] = useState(window.screen.orientation.type)
   const handleOrientation = () => {
-    // pegar a orientação da tela
     setWindowOrientation(window.screen.orientation.type)
   }
   useEffect(() => {

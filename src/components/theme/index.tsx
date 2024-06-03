@@ -29,10 +29,8 @@ import ModeChanger from './ModeChanger'
 // Config Imports
 import themeConfig from '@configs/themeConfig'
 
-// Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
 
-// Theme Imports
 import mergedTheme from './mergedTheme'
 
 type Props = ChildrenType & {

@@ -25,9 +25,7 @@ const montserrat = Montserrat({
 });
 
 const mergedTheme = (settings: Settings, mode: SystemMode, direction: Theme['direction']) => {
-  // Vars
   const userTheme = {
-    // Write your overrides here.
     typography: {
       fontFamily: montserrat.style.fontFamily
     }

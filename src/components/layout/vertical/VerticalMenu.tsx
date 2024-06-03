@@ -9,10 +9,8 @@ import PerfectScrollbar from 'react-perfect-scrollbar'
 // Type Imports
 import type { VerticalMenuContextProps } from '@menu/components/vertical-menu/Menu'
 
-// Component Imports
 import { Menu, MenuItem, SubMenu } from '@menu/vertical-menu'
 
-// Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 
@@ -83,12 +81,11 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
           meu ciclo
         </MenuItem>
 
-        <SubMenu label="Ciclos" icon={<i className='tabler-reload' />}>
-            <MenuItem href='/meus-ciclos' icon={<i className='tabler-player-play' />}>
-              <h4 className='card-title'>Meus Ciclos</h4>
-            </MenuItem>
+        <SubMenu label='Ciclos' icon={<i className='tabler-reload' />}>
+          <MenuItem href='/meus-ciclos' icon={<i className='tabler-player-play' />}>
+            <h4 className='card-title'>Meus Ciclos</h4>
+          </MenuItem>
         </SubMenu>
-        
       </Menu>
       {/* <Menu
         popoutMenuOffset={{ mainAxis: 23 }}
