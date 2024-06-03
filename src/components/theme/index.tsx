@@ -29,11 +29,9 @@ import ModeChanger from './ModeChanger'
 // Config Imports
 import themeConfig from '@configs/themeConfig'
 
-// Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
 
-// Core Theme Imports
-import defaultCoreTheme from '@core/theme'
+import mergedTheme from './mergedTheme'
 
 type Props = ChildrenType & {
   direction: Direction
@@ -87,7 +85,7 @@ const ThemeProvider = (props: Props) => {
       }
     }
 
-    const coreTheme = deepmerge(defaultCoreTheme(settings, currentMode, direction), newColorScheme)
+    const coreTheme = deepmerge(mergedTheme(settings, currentMode, direction), newColorScheme)
 
     return extendTheme(coreTheme)
 

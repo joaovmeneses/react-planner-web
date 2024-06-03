@@ -92,7 +92,10 @@ const HorizontalMenu = () => {
           About
         </MenuItem>
         <MenuItem href='/meu-ciclo' icon={<i className='tabler-mail' />}>
-          Contact
+          Meu Ciclo
+        </MenuItem>
+        <MenuItem href='/meus-ciclos' icon={<i className='tabler-player-play' />}>
+          <h4 className='card-title'>Meus Ciclos</h4>
         </MenuItem>
       </Menu>
       {/* <Menu
