@@ -11,9 +11,11 @@ interface CardBodyProps {
   id: string;
   indice: number;
   className?: string;
+  onDelete: (indice: number) => void; 
+  onEdit: (indice: number) => void;
 }
 
-export default function CardBody({ nome, horasObjetivo, status, id, indice, className }: CardBodyProps) {
+export default function CardBody({ nome, horasObjetivo, status, id, indice, className, onDelete, onEdit}: CardBodyProps) {
   
   const formatNumber = (num: number): string => {
     return num.toString().padStart(2, '0');
@@ -28,24 +30,20 @@ export default function CardBody({ nome, horasObjetivo, status, id, indice, clas
   };
 
   return (
-    <div className={`p-4 my-4 border-2 rounded-lg ${className} ${
-        status === 'em andamento' ? 'border-orange-400' :
-        status === 'não iniciado' ? 'border-green-400' :
-        status === 'completo' ? 'border-gray-400' : 'border-gray-200'
-      }`}>
+    <div className={`p-4 my-4 border-2 rounded-lg ${className}`}>
       <div className='flex flex-col items-center'>
-        <h1 className='text-base font-semibold text-gray-700'>{nome}</h1>
-        <h2 className='text-lg text-gray-500 mt-2'>
+        <h1 className='text-base font-semibold text-light-text'>{nome}</h1>
+        <h2 className='text-base text-light-text mt-2'>
           {converteTempo(horasObjetivo)}
         </h2>
         <div className='flex justify-around w-full mt-4'>
-          <button className='bg-transparent text-green-500 hover:text-green-600'>
+          <button onClick={() => onEdit(indice)} className='bg-transparent text-[#28c76f] p-2 hover:bg-[#28c76f] hover:bg-opacity-50'>
             <FontAwesomeIcon icon={faCog} />
           </button>
-          <button className='bg-transparent text-red-500 hover:text-red-600'>
+          <button onClick={() => onDelete(indice)} className='bg-transparent p-2 text-[#28c76f] hover:bg-[#28c76f] hover:bg-opacity-50'>
             <FontAwesomeIcon icon={faTrash} />
           </button>
-          <button className='bg-transparent text-green-500 hover:text-green-600'>
+          <button className='bg-transparent text-[#28c76f] p-2 hover:bg-[#28c76f] hover:bg-opacity-50'>
             <FontAwesomeIcon icon={faCheck} />
           </button>
         </div>

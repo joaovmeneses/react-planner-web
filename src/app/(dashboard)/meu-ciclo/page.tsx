@@ -1,139 +1,227 @@
-"use client"
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import api from '../../../../axiosConfig';
-import { GridContextProvider, GridDropZone, GridItem, swap, move } from 'react-grid-dnd';
-import CardBody from '@/components/meu-ciclo/CardBody';
-import Timercard from '@/components/meu-ciclo/timer/Timer';
-import Modal from './modalHoras/modalHoras';
-
-
-interface SelectedDisciplina {
-    id: string;
-    nome: string;
-    horas_objetivo: number;
-    status: string;
-    indice: number;
-}
-
-interface Disciplina {
-    id: string;
-    nome: string;
-}
+import React, { useEffect, useState, useContext } from 'react'
+import api from '../../../../axiosConfig'
+import { GridContextProvider, GridDropZone, GridItem, swap, move } from 'react-grid-dnd'
+import CardBody from '@/components/meu-ciclo/CardBody'
+import Timercard from '@/components/meu-ciclo/timer/Timer'
+import Modal from './modalHoras/modalHoras'
+import { SettingsContext } from '@/@core/contexts/settingsContext'
+import { Disciplina, SelectedDisciplina } from '@/interfaces/meuCiclo'
 
 export default function MeuCiclo() {
-    const [disciplinas, setDisciplinas] = useState<Disciplina[]>([]);
-    const [selectedDisciplinas, setSelectedDisciplinas] = useState<SelectedDisciplina[]>([]);
-    const [dadosTimer, setDadosTimer] = useState<{ disciplina: string; progressoInicial: number }>({ disciplina: "", progressoInicial: 0 });
-    const [currentDisciplina, setCurrentDisciplina] = useState<Disciplina | null>(null);
-    const [modalOpen, setModalOpen] = useState<boolean>(false);
-    const [draggingItem, setDraggingItem] = useState<string | null>(null);
+  const settingsContext = useContext(SettingsContext)
+  const [disciplinas, setDisciplinas] = useState<Disciplina[]>([])
+  const [selectedDisciplinas, setSelectedDisciplinas] = useState<SelectedDisciplina[]>([])
+  const [dadosTimer, setDadosTimer] = useState<{ disciplina: string; progressoInicial: number }>({
+    disciplina: '',
+    progressoInicial: 0
+  })
+  const [currentDisciplina, setCurrentDisciplina] = useState<Disciplina | null>(null)
+  const [modalOpen, setModalOpen] = useState<boolean>(false)
+  const [draggingItem, setDraggingItem] = useState<string | null>(null)
+  const [searchText, setSearchText] = useState<string>('')
+  const [editingDisciplina, setEditingDisciplina] = useState<SelectedDisciplina | null>(null)
+  const [disciplinaToEditIndex, setDisciplinaToEditIndex] = useState<number | null>(null)
+  
+  const getSystemMode = (): 'light' | 'dark' => {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+  
+  const [systemMode, setSystemMode] = useState<'light' | 'dark'>(getSystemMode())
 
-    const ciclo_id: string = "4ecb7ecf-c58d-4c87-a75b-af3f34dff50d";
+  const ciclo_id: string = '4ecb7ecf-c58d-4c87-a75b-af3f34dff50d'
 
-    useEffect(() => {
-        api.get(`/disciplina`).then(response => {
-            const disciplinasFiltradas = response.data.map((disciplina: any) => ({
-                id: disciplina._id,
-                nome: disciplina.nome
-            }));
-            setDisciplinas(disciplinasFiltradas);
-        });
+  useEffect(() => {
+    api.get(`/disciplina`).then(response => {
+      let disciplinasFiltradas = response.data.map((disciplina: any) => ({
+        id: disciplina._id,
+        nome: disciplina.nome
+      }))
+      disciplinasFiltradas.shift()
+      setDisciplinas(disciplinasFiltradas)
+    })
 
-        api.get(`/disciplina/ciclo/${ciclo_id}`).then(response => {
-            setSelectedDisciplinas(response.data);
-        });
-    }, [ciclo_id]);
-
-    const onChange = (sourceId: string, sourceIndex: number, targetIndex: number, targetId?: string) => {
-        const effectiveTargetId = targetId ?? sourceId;
-        console.log(sourceId, sourceIndex, targetIndex, targetId, effectiveTargetId);
-
-        if (sourceId === effectiveTargetId) {
-            if (sourceId === 'disciplinas') {
-                const updatedItems = swap(disciplinas, sourceIndex, targetIndex);
-                setDisciplinas(updatedItems);
-            } else {
-                const updatedItems = swap(selectedDisciplinas, sourceIndex, targetIndex);
-                setSelectedDisciplinas(updatedItems);
-            }
+    api
+      .get(`/disciplina/ciclo/${ciclo_id}`)
+      .then(response => {
+        if (Array.isArray(response.data)) {
+          setSelectedDisciplinas(response.data)
+          console.log(response.data)
         } else {
-            if (sourceId === 'disciplinas' && targetId === 'selectedDisciplinas') {
-                const item = disciplinas[sourceIndex];
-                setCurrentDisciplina(item);
-                setModalOpen(true);
-                setDisciplinas(prev => prev.filter((_, idx) => idx !== sourceIndex));
-            } else if (sourceId === 'selectedDisciplinas' && targetId === 'disciplinas') {
-                const item = selectedDisciplinas[sourceIndex];
-                const updatedSourceItems = selectedDisciplinas.filter((_, idx) => idx !== sourceIndex);
-                const updatedTargetItems = [...disciplinas];
-                updatedTargetItems.splice(targetIndex, 0, { id: item.id, nome: item.nome });
-                setSelectedDisciplinas(updatedSourceItems);
-                setDisciplinas(updatedTargetItems);
-            }
+          setSelectedDisciplinas([])
+          console.error('API response is not an array:', response.data)
         }
-    };
+      })
+      .catch(error => {
+        console.error('Error fetching selectedDisciplinas:', error)
+        setSelectedDisciplinas([])
+      })
+  }, [ciclo_id])
 
-    const handleModalSubmit = (horasObjetivo: number) => {
-        if (currentDisciplina) {
-            const updatedSelectedDisciplinas = [
-                ...selectedDisciplinas,
-                {
-                    ...currentDisciplina,
-                    horas_objetivo: horasObjetivo * 3600,
-                    status: 'não iniciado',
-                    indice: selectedDisciplinas.length
-                }
-            ];
-            setSelectedDisciplinas(updatedSelectedDisciplinas);
-            setCurrentDisciplina(null);
-        }
-        setModalOpen(false);
-    };
+  useEffect(() => {
+    if (disciplinaToEditIndex) {
+      handleEdit(disciplinaToEditIndex)
+      setDisciplinaToEditIndex(null)
+    }
+  }, [selectedDisciplinas])
 
-    return (
-        <div className='flex space-x-4 p-4'>
-            <GridContextProvider onChange={onChange}>
-                <div className='flex flex-col space-y-4'>
-                    <Timercard nome={dadosTimer.disciplina} horasObjetivo={0} horasEstudadas={dadosTimer.progressoInicial} />
-                    <GridDropZone id="disciplinas" boxesPerRow={1} rowHeight={40} className='h-96 mb-2 border rounded-lg bg-[#283046]'>
-                        {disciplinas.map((disciplina, index) => (
-                            <GridItem key={disciplina.id}>
-                                <div className={`flex justify-center p-2 rounded-md ${draggingItem === disciplina.id ? 'bg-gray-700 text-white' : ''}`}>
-                                    {disciplina.nome}
-                                </div>
-                            </GridItem>
-                        ))}
-                    </GridDropZone>
-                </div>
-                <div className='w-full'>
-                    <GridDropZone id="selectedDisciplinas" boxesPerRow={5} rowHeight={150} className='bg-[#283046] text-gray-200  rounded-lg min-h-[600px] min-w-[600px]'>
-                        {selectedDisciplinas.map((disciplina, index) => (
-                            <GridItem key={disciplina.id}>
-                                <CardBody
-                                    nome={disciplina.nome}
-                                    horasObjetivo={disciplina.horas_objetivo}
-                                    status={disciplina.status}
-                                    id={disciplina.id}
-                                    indice={index}
-                                    className='bg-transparent m-2 hover:bg-gray-700 '
-                                />
-                            </GridItem>
-                        ))}
-                    </GridDropZone>
-                </div>
-            </GridContextProvider>
-            {modalOpen && (
-                <Modal onClose={() => setModalOpen(false)} onSubmit={handleModalSubmit} />
-            )}
+  useEffect(() => {
+    const handleSystemModeChange = (e: MediaQueryListEvent) => {
+      setSystemMode(e.matches ? 'dark' : 'light')
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    mediaQuery.addEventListener('change', handleSystemModeChange)
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemModeChange)
+    }
+  }, [])
+
+  const onChange = (sourceId: string, sourceIndex: number, targetIndex: number, targetId?: string) => {
+    const effectiveTargetId = targetId ?? sourceId
+    console.log(sourceId, sourceIndex, targetIndex, targetId, effectiveTargetId)
+
+    if (sourceId === effectiveTargetId) {
+      if (sourceId === 'disciplinas') {
+        const updatedItems = swap(disciplinas, sourceIndex, targetIndex)
+        setDisciplinas(updatedItems)
+      } else {
+        const updatedItems = swap(selectedDisciplinas, sourceIndex, targetIndex)
+        const updatedWithIndices = updatedItems.map((item, index) => ({ ...item, indice: index }))
+        setSelectedDisciplinas(updatedWithIndices)
+      }
+    } else {
+      if (sourceId === 'disciplinas' && targetId === 'selectedDisciplinas') {
+        const item = disciplinas[sourceIndex]
+        setCurrentDisciplina(item)
+        const updatedTargetItems = [...selectedDisciplinas]
+        updatedTargetItems.splice(targetIndex, 0, {
+          id: item.id,
+          nome: item.nome,
+          horas_objetivo: 0,
+          status: 'não iniciado',
+          indice: targetIndex
+        })
+        const updatedWithIndices = updatedTargetItems.map((item, index) => ({ ...item, indice: index }))
+        setSelectedDisciplinas(updatedWithIndices)
+        setDisciplinaToEditIndex(targetIndex)
+      } else if (sourceId === 'selectedDisciplinas' && targetId === 'disciplinas') {
+        const item = selectedDisciplinas[sourceIndex]
+        const updatedSourceItems = selectedDisciplinas.filter((_, idx) => idx !== sourceIndex)
+        const updatedTargetItems = [...disciplinas]
+        updatedTargetItems.splice(targetIndex, 0, { id: item.id, nome: item.nome })
+        const updatedWithIndices = updatedSourceItems.map((item, index) => ({ ...item, indice: index }))
+        setSelectedDisciplinas(updatedWithIndices)
+        setDisciplinas(updatedTargetItems)
+      }
+    }
+  }
+
+  const handleModalSubmit = (horasObjetivo: number) => {
+    if (editingDisciplina) {
+      const updatedSelectedDisciplinas = selectedDisciplinas.map(disciplina =>
+        disciplina.indice === editingDisciplina.indice ? { ...disciplina, horas_objetivo: horasObjetivo } : disciplina
+      )
+      setSelectedDisciplinas(updatedSelectedDisciplinas)
+      setEditingDisciplina(null)
+    }
+    setModalOpen(false)
+  }
+
+  const handleDelete = (index: number) => {
+    const updatedSelectedDisciplinas = selectedDisciplinas.filter(disciplina => disciplina.indice !== index)
+    const updatedWithIndices = updatedSelectedDisciplinas.map((item, index) => ({ ...item, indice: index }))
+    setSelectedDisciplinas(updatedWithIndices)
+    console.log(updatedWithIndices)
+  }
+
+  const handleEdit = (index: number) => {
+    const disciplinaToEdit = selectedDisciplinas.find(disciplina => disciplina.indice === index)
+    if (disciplinaToEdit) {
+      setEditingDisciplina(disciplinaToEdit)
+      setModalOpen(true)
+    }
+  }
+
+  if (!settingsContext) {
+    return <div>Carregando...</div>
+  }
+
+  const filteredDisciplinas = disciplinas.filter(disciplina =>
+    disciplina.nome.toLowerCase().includes(searchText.toLowerCase())
+  )
+
+  const { settings, updateSettings } = settingsContext
+
+  const getThemeClass = () => {
+    if (settings.mode === 'system') {
+      return systemMode === 'dark' ? 'dark' : ''
+    }
+    return settings.mode === 'dark' ? 'dark' : ''
+  }
+
+  return (
+    <div className={`flex space-x-4 ${getThemeClass()}`}>
+      <GridContextProvider onChange={onChange}>
+        <div className='flex flex-col space-y-4'>
+          <Timercard nome={dadosTimer.disciplina} horasObjetivo={0} horasEstudadas={dadosTimer.progressoInicial} />
+          <div className='p-4 rounded-lg dark:bg-dark text-light-text bg-white dark:text-dark-text'>
+            <h2 className='dark:bg-dark bg-white text-[#5c55bb] text-base'>Todas as Disciplinas</h2>
+            <input
+              type='text'
+              value={searchText}
+              onChange={e => setSearchText(e.target.value)}
+              placeholder='Pesquisar'
+              className='w-full rounded-lg bg-light dark:bg-dark text-light-text dark:text-dark-text p-2 border border-[#373d50] focus:outline-none focus:border-[#6960da] my-4'
+            />
+            <GridDropZone id='disciplinas' boxesPerRow={1} rowHeight={40} className='h-96 mb-2 overflow-y-auto'>
+              {filteredDisciplinas.map((disciplina, index) => (
+                <GridItem key={disciplina.id}>
+                  <div
+                    className={`flex justify-center p-2 rounded-md ${draggingItem === disciplina.id ? 'bg-gray-700 text-white' : ''}`}
+                  >
+                    {disciplina.nome}
+                  </div>
+                  <div className='border border-[#373d50]'></div>
+                </GridItem>
+              ))}
+            </GridDropZone>
+          </div>
         </div>
-    );
+        <div className='w-full dark:bg-dark bg-white p-4 rounded-lg'>
+          <h2 className='dark:bg-dark bg-white p-4 text-[#5c55bb] text-base'>Ciclo de estudo</h2>
+          <GridDropZone
+            id='selectedDisciplinas'
+            boxesPerRow={5}
+            rowHeight={150}
+            className='dark:bg-dark text-light-text bg-white dark:text-dark-text min-h-[600px] min-w-[800px]'
+          >
+            {selectedDisciplinas.map((disciplina, index) => (
+              <GridItem key={disciplina.id}>
+                <CardBody
+                  nome={disciplina.nome}
+                  horasObjetivo={disciplina.horas_objetivo}
+                  status={disciplina.status}
+                  id={disciplina.id}
+                  indice={index}
+                  className='bg-transparent m-2'
+                  onDelete={handleDelete}
+                  onEdit={handleEdit}
+                />
+              </GridItem>
+            ))}
+          </GridDropZone>
+        </div>
+      </GridContextProvider>
+      {modalOpen && (
+        <Modal
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleModalSubmit}
+          nomeDisciplina={currentDisciplina ? currentDisciplina.nome : (editingDisciplina ? editingDisciplina.nome : '')}
+          initialHorasObjetivo={editingDisciplina ? editingDisciplina.horas_objetivo : undefined}
+        />
+      )}
+    </div>
+  )
 }
-
-
-
-
-// const router = useRouter();
-    //Quando a página meus-ciclos esteja pronta, trocar ciclo_id por id
-    //Alterar tambem o page.tsx para [id].tsx
-    // const {id} = router.query;
