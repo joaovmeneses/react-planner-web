@@ -1,7 +1,30 @@
-import CicleCard from '@/components/novo-ciclo/CicleCard'
-import React from 'react'
+'use client'
+import Loading from '@/components/Loading/Loading'
+import CycleCard from '@/components/novo-ciclo/CycleCard'
+import React, { useState } from 'react'
+import api from '../../../../axiosConfig'
+import { useRouter } from 'next/navigation'
+
+export interface FromZeroPayload {
+  nome: string
+}
 
 const NovoCiclo = () => {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const handleCreateFromZero = async (value: FromZeroPayload) => {
+    setIsLoading(true)
+    const token = localStorage.getItem('token')
+    const res = await api.post('/ciclo', value, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+
+    router.push(`/meu-ciclo/${res.data.id}`)
+  }
+
   return (
     <>
       <div className='flex flex-col gap-10'>
@@ -19,12 +42,13 @@ const NovoCiclo = () => {
         </section>
         <section>
           <div className='grid grid-flow-row gap-5 lg:gap-0 lg:grid-flow-col'>
-            <CicleCard title='Ciclo do Zero' input={true}></CicleCard>
-            <CicleCard title='Ciclo por Concurso'></CicleCard>
-            <CicleCard title='Ciclo por Área'></CicleCard>
+            <CycleCard title='Ciclo do Zero' onSubmit={handleCreateFromZero} />
+            <CycleCard title='Ciclo por Concurso' />
+            <CycleCard title='Ciclo por Área' />
           </div>
         </section>
       </div>
+      <Loading isLoading={isLoading} />
     </>
   )
 }
