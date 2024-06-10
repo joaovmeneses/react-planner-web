@@ -5,6 +5,8 @@ import Modal from '@/components/meus-ciclos/ModalDelete'
 import React, { useEffect, useState } from 'react'
 import api from '../../../../axiosConfig'
 import { useRouter } from 'next/navigation'
+import useVerticalMenu from '@/@menu/hooks/useVerticalMenu'
+import Loading from '@/components/Loading/Loading'
 
 export interface Ciclo {
   id: string
@@ -19,6 +21,8 @@ const MeusCiclos = () => {
   const [deletedCiclo, setDeletedCiclo] = useState<string>('')
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
+  const [isLoading, setIsLoading] = useState<boolean>(true)
+
   const getCiclos = async () => {
     const token = localStorage.getItem('token')
     const res = await api.get('/ciclo', {
@@ -28,9 +32,11 @@ const MeusCiclos = () => {
     })
     const data = res.data
     setCiclos(data)
+    setIsLoading(false)
   }
   const handleDelete = async (id: string) => {
     const token = localStorage.getItem('token')
+    setIsLoading(true)
     setIsModalOpen(false)
     await api.delete(`/ciclo/${id}`, {
       headers: {
@@ -64,6 +70,7 @@ const MeusCiclos = () => {
         ))}
       </List>
       {isModalOpen && <Modal id={selectedCiclo} onClose={() => setIsModalOpen(false)} onSubmit={handleDelete} />}
+      <Loading isLoading={isLoading} />
     </>
   )
 }

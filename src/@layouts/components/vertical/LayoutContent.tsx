@@ -14,6 +14,7 @@ import { verticalLayoutClasses } from '@layouts/utils/layoutClasses'
 
 // Styled Component Imports
 import StyledMain from '@layouts/styles/shared/StyledMain'
+import MainLayoutWrapper from '@/components/layout/custom/MainLayoutWrapper'
 
 const LayoutContent = ({ children }: ChildrenType) => {
   // Hooks
@@ -31,7 +32,7 @@ const LayoutContent = ({ children }: ChildrenType) => {
         [verticalLayoutClasses.contentWide]: contentWide
       })}
     >
-      {children}
+      {<MainLayoutWrapper>{children}</MainLayoutWrapper>}
     </StyledMain>
   )
 }
