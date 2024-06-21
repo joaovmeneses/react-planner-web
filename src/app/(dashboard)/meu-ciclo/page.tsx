@@ -23,11 +23,11 @@ export default function MeuCiclo() {
   const [searchText, setSearchText] = useState<string>('')
   const [editingDisciplina, setEditingDisciplina] = useState<SelectedDisciplina | null>(null)
   const [disciplinaToEditIndex, setDisciplinaToEditIndex] = useState<number | null>(null)
-  
+
   const getSystemMode = (): 'light' | 'dark' => {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   }
-  
+
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>(getSystemMode())
 
   const ciclo_id: string = '4ecb7ecf-c58d-4c87-a75b-af3f34dff50d'
@@ -84,9 +84,11 @@ export default function MeuCiclo() {
 
     if (sourceId === effectiveTargetId) {
       if (sourceId === 'disciplinas') {
+        if (targetIndex === disciplinas.length) return
         const updatedItems = swap(disciplinas, sourceIndex, targetIndex)
         setDisciplinas(updatedItems)
       } else {
+        if (targetIndex === selectedDisciplinas.length) return
         const updatedItems = swap(selectedDisciplinas, sourceIndex, targetIndex)
         const updatedWithIndices = updatedItems.map((item, index) => ({ ...item, indice: index }))
         setSelectedDisciplinas(updatedWithIndices)
@@ -179,7 +181,8 @@ export default function MeuCiclo() {
               {filteredDisciplinas.map((disciplina, index) => (
                 <GridItem key={disciplina.id}>
                   <div
-                    className={`flex justify-center p-2 rounded-md ${draggingItem === disciplina.id ? 'bg-gray-700 text-white' : ''}`}
+                    onMouseDown={e => e.preventDefault()}
+                    className={`flex justify-center p-2 rounded-md ${draggingItem === disciplina.id ? 'bg-gray-700 text-white' : ''} cursor-pointer`}
                   >
                     {disciplina.nome}
                   </div>
@@ -205,7 +208,7 @@ export default function MeuCiclo() {
                   status={disciplina.status}
                   id={disciplina.id}
                   indice={index}
-                  className='bg-transparent m-2'
+                  className='bg-transparent m-2 cursor-pointer'
                   onDelete={handleDelete}
                   onEdit={handleEdit}
                 />
@@ -218,7 +221,7 @@ export default function MeuCiclo() {
         <Modal
           onClose={() => setModalOpen(false)}
           onSubmit={handleModalSubmit}
-          nomeDisciplina={currentDisciplina ? currentDisciplina.nome : (editingDisciplina ? editingDisciplina.nome : '')}
+          nomeDisciplina={currentDisciplina ? currentDisciplina.nome : editingDisciplina ? editingDisciplina.nome : ''}
           initialHorasObjetivo={editingDisciplina ? editingDisciplina.horas_objetivo : undefined}
         />
       )}
