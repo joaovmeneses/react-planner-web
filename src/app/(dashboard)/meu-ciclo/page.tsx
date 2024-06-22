@@ -24,6 +24,9 @@ export default function MeuCiclo() {
   const [editingDisciplina, setEditingDisciplina] = useState<SelectedDisciplina | null>(null)
   const [disciplinaToEditIndex, setDisciplinaToEditIndex] = useState<number | null>(null)
 
+  const [disciplinasKeys, setDisciplinasKeys] = useState<number[]>([])
+  const [selectedDisciplinasKeys, setSelectedDisciplinasKeys] = useState<number[]>([])
+
   const getSystemMode = (): 'light' | 'dark' => {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   }
@@ -40,6 +43,10 @@ export default function MeuCiclo() {
       }))
       disciplinasFiltradas.shift()
       setDisciplinas(disciplinasFiltradas)
+
+      const keys = []
+      for (let i = 0; i < disciplinasFiltradas.length; i++) keys.push(i)
+      setDisciplinasKeys(keys)
     })
 
     api
@@ -47,6 +54,11 @@ export default function MeuCiclo() {
       .then(response => {
         if (Array.isArray(response.data)) {
           setSelectedDisciplinas(response.data)
+
+          const keys = []
+          for (let i = 0; i < response.data.length; i++) keys.push(i)
+          setSelectedDisciplinasKeys(keys)
+
           console.log(response.data)
         } else {
           setSelectedDisciplinas([])
@@ -78,6 +90,14 @@ export default function MeuCiclo() {
     }
   }, [])
 
+  const keysSwap = (keys: number[], sourceIndex: number, targetIndex: number) => {
+    let temp = keys[sourceIndex]
+    keys = keys.filter((_, i) => i !== sourceIndex)
+    keys.splice(targetIndex, 0, temp)
+
+    return keys
+  }
+
   const onChange = (sourceId: string, sourceIndex: number, targetIndex: number, targetId?: string) => {
     const effectiveTargetId = targetId ?? sourceId
     console.log(sourceId, sourceIndex, targetIndex, targetId, effectiveTargetId)
@@ -87,11 +107,17 @@ export default function MeuCiclo() {
         if (targetIndex === disciplinas.length) return
         const updatedItems = swap(disciplinas, sourceIndex, targetIndex)
         setDisciplinas(updatedItems)
+
+        const newKeys = keysSwap(disciplinasKeys, sourceIndex, targetIndex)
+        setDisciplinasKeys(newKeys)
       } else {
         if (targetIndex === selectedDisciplinas.length) return
         const updatedItems = swap(selectedDisciplinas, sourceIndex, targetIndex)
         const updatedWithIndices = updatedItems.map((item, index) => ({ ...item, indice: index }))
         setSelectedDisciplinas(updatedWithIndices)
+
+        const newKeys = keysSwap(selectedDisciplinasKeys, sourceIndex, targetIndex)
+        setSelectedDisciplinasKeys(newKeys)
       }
     } else {
       if (sourceId === 'disciplinas' && targetId === 'selectedDisciplinas') {
@@ -105,9 +131,14 @@ export default function MeuCiclo() {
           status: 'não iniciado',
           indice: targetIndex
         })
+
         const updatedWithIndices = updatedTargetItems.map((item, index) => ({ ...item, indice: index }))
         setSelectedDisciplinas(updatedWithIndices)
         setDisciplinaToEditIndex(targetIndex)
+
+        const keys = selectedDisciplinasKeys
+        keys.splice(targetIndex, 0, Math.max(...selectedDisciplinasKeys) + 1)
+        setSelectedDisciplinasKeys(keys)
       } else if (sourceId === 'selectedDisciplinas' && targetId === 'disciplinas') {
         const item = selectedDisciplinas[sourceIndex]
         const updatedSourceItems = selectedDisciplinas.filter((_, idx) => idx !== sourceIndex)
@@ -116,6 +147,13 @@ export default function MeuCiclo() {
         const updatedWithIndices = updatedSourceItems.map((item, index) => ({ ...item, indice: index }))
         setSelectedDisciplinas(updatedWithIndices)
         setDisciplinas(updatedTargetItems)
+
+        const selectedKeys = selectedDisciplinasKeys.filter((_, i) => i !== sourceIndex)
+        setSelectedDisciplinasKeys(selectedKeys)
+
+        const keys = disciplinasKeys
+        keys.splice(targetIndex, 0, Math.max(...disciplinasKeys) + 1)
+        setDisciplinasKeys(keys)
       }
     }
   }
@@ -136,6 +174,10 @@ export default function MeuCiclo() {
     const updatedWithIndices = updatedSelectedDisciplinas.map((item, index) => ({ ...item, indice: index }))
     setSelectedDisciplinas(updatedWithIndices)
     console.log(updatedWithIndices)
+
+    const keys = selectedDisciplinasKeys
+    keys.filter((_, i) => i !== index)
+    setSelectedDisciplinasKeys(keys)
   }
 
   const handleEdit = (index: number) => {
@@ -179,7 +221,7 @@ export default function MeuCiclo() {
             />
             <GridDropZone id='disciplinas' boxesPerRow={1} rowHeight={40} className='h-96 mb-2 overflow-y-auto'>
               {filteredDisciplinas.map((disciplina, index) => (
-                <GridItem key={disciplina.id}>
+                <GridItem key={disciplinasKeys[index]}>
                   <div
                     onMouseDown={e => e.preventDefault()}
                     className={`flex justify-center p-2 rounded-md ${draggingItem === disciplina.id ? 'bg-gray-700 text-white' : ''} cursor-pointer`}
@@ -201,7 +243,7 @@ export default function MeuCiclo() {
             className='dark:bg-dark text-light-text bg-white dark:text-dark-text min-h-[600px] min-w-[800px]'
           >
             {selectedDisciplinas.map((disciplina, index) => (
-              <GridItem key={disciplina.id}>
+              <GridItem key={selectedDisciplinasKeys[index]}>
                 <CardBody
                   nome={disciplina.nome}
                   horasObjetivo={disciplina.horas_objetivo}
