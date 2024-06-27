@@ -34,6 +34,7 @@ export default function MeuCiclo() {
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>(getSystemMode())
 
   const ciclo_id: string = '4ecb7ecf-c58d-4c87-a75b-af3f34dff50d'
+  // const ciclo_id: string = 'd76f6b53-2a97-4852-8bb5-16d37b9cb309'
 
   useEffect(() => {
     api.get(`/disciplina`).then(response => {
@@ -43,6 +44,8 @@ export default function MeuCiclo() {
       }))
       disciplinasFiltradas.shift()
       setDisciplinas(disciplinasFiltradas)
+
+      console.log('res2', response.data)
 
       const keys = []
       for (let i = 0; i < disciplinasFiltradas.length; i++) keys.push(i)
@@ -59,7 +62,7 @@ export default function MeuCiclo() {
           for (let i = 0; i < response.data.length; i++) keys.push(i)
           setSelectedDisciplinasKeys(keys)
 
-          console.log(response.data)
+          console.log('res:', response.data)
         } else {
           setSelectedDisciplinas([])
           console.error('API response is not an array:', response.data)
@@ -128,6 +131,7 @@ export default function MeuCiclo() {
           id: item.id,
           nome: item.nome,
           horas_objetivo: 0,
+          horas_estudadas: 0,
           status: 'não iniciado',
           indice: targetIndex
         })
@@ -158,17 +162,25 @@ export default function MeuCiclo() {
     }
   }
 
-  const handleModalSubmit = (horasObjetivo: number) => {
+  const handleModalSubmit = (horasObjetivo: number, horasEstudadas: number) => {
     if (editingDisciplina) {
       const updatedSelectedDisciplinas = selectedDisciplinas.map(disciplina =>
-        disciplina.indice === editingDisciplina.indice ? { ...disciplina, horas_objetivo: horasObjetivo } : disciplina
+        disciplina.indice === editingDisciplina.indice
+          ? {
+              ...disciplina,
+              horas_objetivo: horasObjetivo,
+              horas_estudadas: horasEstudadas
+            }
+          : disciplina
       )
+
+      console.log(updatedSelectedDisciplinas[editingDisciplina.indice])
+
       setSelectedDisciplinas(updatedSelectedDisciplinas)
       setEditingDisciplina(null)
     }
     setModalOpen(false)
   }
-
   const handleDelete = (index: number) => {
     const updatedSelectedDisciplinas = selectedDisciplinas.filter(disciplina => disciplina.indice !== index)
     const updatedWithIndices = updatedSelectedDisciplinas.map((item, index) => ({ ...item, indice: index }))
@@ -265,6 +277,7 @@ export default function MeuCiclo() {
           onSubmit={handleModalSubmit}
           nomeDisciplina={currentDisciplina ? currentDisciplina.nome : editingDisciplina ? editingDisciplina.nome : ''}
           initialHorasObjetivo={editingDisciplina ? editingDisciplina.horas_objetivo : undefined}
+          initialHorasEstudadas={editingDisciplina ? editingDisciplina.horas_estudadas : undefined}
         />
       )}
     </div>
