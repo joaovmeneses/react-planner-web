@@ -45,8 +45,6 @@ export default function MeuCiclo() {
       disciplinasFiltradas.shift()
       setDisciplinas(disciplinasFiltradas)
 
-      console.log('res2', response.data)
-
       const keys = []
       for (let i = 0; i < disciplinasFiltradas.length; i++) keys.push(i)
       setDisciplinasKeys(keys)
@@ -59,7 +57,7 @@ export default function MeuCiclo() {
           setSelectedDisciplinas(response.data)
 
           const keys = []
-          for (let i = 0; i < response.data.length; i++) keys.push(i)
+          for (let i = 0; i < response.data.length; i++) keys.push(response.data[i].indice)
           setSelectedDisciplinasKeys(keys)
 
           console.log('res:', response.data)
@@ -103,27 +101,33 @@ export default function MeuCiclo() {
 
   const onChange = (sourceId: string, sourceIndex: number, targetIndex: number, targetId?: string) => {
     const effectiveTargetId = targetId ?? sourceId
-    console.log(sourceId, sourceIndex, targetIndex, targetId, effectiveTargetId)
+    // console.log(sourceId, sourceIndex, targetIndex, targetId, effectiveTargetId)
 
     if (sourceId === effectiveTargetId) {
       if (sourceId === 'disciplinas') {
         if (targetIndex === disciplinas.length) return
-        const updatedItems = swap(disciplinas, sourceIndex, targetIndex)
-        setDisciplinas(updatedItems)
 
         const newKeys = keysSwap(disciplinasKeys, sourceIndex, targetIndex)
         setDisciplinasKeys(newKeys)
+
+        const updatedItems = swap(disciplinas, sourceIndex, targetIndex)
+        setDisciplinas(updatedItems)
       } else {
         if (targetIndex === selectedDisciplinas.length) return
-        const updatedItems = swap(selectedDisciplinas, sourceIndex, targetIndex)
-        const updatedWithIndices = updatedItems.map((item, index) => ({ ...item, indice: index }))
-        setSelectedDisciplinas(updatedWithIndices)
 
         const newKeys = keysSwap(selectedDisciplinasKeys, sourceIndex, targetIndex)
         setSelectedDisciplinasKeys(newKeys)
+
+        const updatedItems = swap(selectedDisciplinas, sourceIndex, targetIndex)
+        const updatedWithIndices = updatedItems.map((item, index) => ({ ...item, indice: newKeys[index] }))
+        setSelectedDisciplinas(updatedWithIndices)
       }
     } else {
       if (sourceId === 'disciplinas' && targetId === 'selectedDisciplinas') {
+        const keys = selectedDisciplinasKeys
+        keys.splice(targetIndex, 0, Math.max(...selectedDisciplinasKeys) + 1)
+        setSelectedDisciplinasKeys(keys)
+
         const item = disciplinas[sourceIndex]
         setCurrentDisciplina(item)
         const updatedTargetItems = [...selectedDisciplinas]
@@ -132,37 +136,52 @@ export default function MeuCiclo() {
           nome: item.nome,
           horas_objetivo: 0,
           horas_estudadas: 0,
-          status: 'não iniciado',
-          indice: targetIndex
+          status: 'nao-iniciada',
+          indice: keys[targetIndex]
         })
 
-        const updatedWithIndices = updatedTargetItems.map((item, index) => ({ ...item, indice: index }))
+        const updatedWithIndices = updatedTargetItems.map((item, index) => ({ ...item, indice: keys[index] }))
         setSelectedDisciplinas(updatedWithIndices)
-        setDisciplinaToEditIndex(targetIndex)
-
-        const keys = selectedDisciplinasKeys
-        keys.splice(targetIndex, 0, Math.max(...selectedDisciplinasKeys) + 1)
-        setSelectedDisciplinasKeys(keys)
+        setDisciplinaToEditIndex(keys[targetIndex])
       } else if (sourceId === 'selectedDisciplinas' && targetId === 'disciplinas') {
-        const item = selectedDisciplinas[sourceIndex]
-        const updatedSourceItems = selectedDisciplinas.filter((_, idx) => idx !== sourceIndex)
-        const updatedTargetItems = [...disciplinas]
-        updatedTargetItems.splice(targetIndex, 0, { id: item.id, nome: item.nome })
-        const updatedWithIndices = updatedSourceItems.map((item, index) => ({ ...item, indice: index }))
-        setSelectedDisciplinas(updatedWithIndices)
-        setDisciplinas(updatedTargetItems)
-
         const selectedKeys = selectedDisciplinasKeys.filter((_, i) => i !== sourceIndex)
         setSelectedDisciplinasKeys(selectedKeys)
 
         const keys = disciplinasKeys
         keys.splice(targetIndex, 0, Math.max(...disciplinasKeys) + 1)
         setDisciplinasKeys(keys)
+
+        const item = selectedDisciplinas[sourceIndex]
+        const updatedSourceItems = selectedDisciplinas.filter((_, idx) => idx !== sourceIndex)
+        const updatedTargetItems = [...disciplinas]
+
+        updatedTargetItems.splice(targetIndex, 0, { id: item.id, nome: item.nome })
+        const updatedWithIndices = updatedSourceItems.map((item, index) => ({ ...item, indice: keys[index] }))
+        setSelectedDisciplinas(updatedWithIndices)
+        setDisciplinas(updatedTargetItems)
       }
     }
   }
 
   const handleModalSubmit = (horasObjetivo: number, horasEstudadas: number) => {
+    const handleEditionRequest = async (editingDisciplina: SelectedDisciplina) => {
+      const token = localStorage.getItem('token')
+      const res = await api.put(
+        `/disciplina/${editingDisciplina.id}`,
+        {
+          ...editingDisciplina,
+          qtd_questoes: 1
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      console.log(res)
+    }
+
     if (editingDisciplina) {
       const updatedSelectedDisciplinas = selectedDisciplinas.map(disciplina =>
         disciplina.indice === editingDisciplina.indice
@@ -174,26 +193,29 @@ export default function MeuCiclo() {
           : disciplina
       )
 
-      console.log(updatedSelectedDisciplinas[editingDisciplina.indice])
-
+      const requestDisciplina = updatedSelectedDisciplinas.find(
+        disciplina => disciplina.indice === editingDisciplina.indice
+      )
+      requestDisciplina && handleEditionRequest(requestDisciplina)
       setSelectedDisciplinas(updatedSelectedDisciplinas)
       setEditingDisciplina(null)
     }
     setModalOpen(false)
   }
   const handleDelete = (index: number) => {
-    const updatedSelectedDisciplinas = selectedDisciplinas.filter(disciplina => disciplina.indice !== index)
-    const updatedWithIndices = updatedSelectedDisciplinas.map((item, index) => ({ ...item, indice: index }))
-    setSelectedDisciplinas(updatedWithIndices)
-    console.log(updatedWithIndices)
-
-    const keys = selectedDisciplinasKeys
-    keys.filter((_, i) => i !== index)
+    const keys = selectedDisciplinasKeys.filter(key => key !== index)
     setSelectedDisciplinasKeys(keys)
+
+    const updatedSelectedDisciplinas = selectedDisciplinas.filter(disciplina => disciplina.indice !== index)
+    const updatedWithIndices = updatedSelectedDisciplinas.map((item, index) => ({ ...item, indice: keys[index] }))
+    setSelectedDisciplinas(updatedWithIndices)
+
+    console.log(index, selectedDisciplinasKeys, keys, updatedWithIndices)
   }
 
   const handleEdit = (index: number) => {
     const disciplinaToEdit = selectedDisciplinas.find(disciplina => disciplina.indice === index)
+    console.log(index, disciplinaToEdit)
     if (disciplinaToEdit) {
       setEditingDisciplina(disciplinaToEdit)
       setModalOpen(true)
@@ -261,7 +283,7 @@ export default function MeuCiclo() {
                   horasObjetivo={disciplina.horas_objetivo}
                   status={disciplina.status}
                   id={disciplina.id}
-                  indice={index}
+                  indice={disciplina.indice}
                   className='bg-transparent m-2 cursor-pointer'
                   onDelete={handleDelete}
                   onEdit={handleEdit}
@@ -273,7 +295,10 @@ export default function MeuCiclo() {
       </GridContextProvider>
       {modalOpen && (
         <Modal
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setCurrentDisciplina(null)
+            setModalOpen(false)
+          }}
           onSubmit={handleModalSubmit}
           nomeDisciplina={currentDisciplina ? currentDisciplina.nome : editingDisciplina ? editingDisciplina.nome : ''}
           initialHorasObjetivo={editingDisciplina ? editingDisciplina.horas_objetivo : undefined}
