@@ -7,23 +7,27 @@ import { faCog, faTrash, faCheck } from '@fortawesome/free-solid-svg-icons'
 interface CardBodyProps {
   nome: string
   horasObjetivo: number
+  horasEstudadas: number
   status: string
   id: string
   indice: number
   className?: string
   onDelete: (indice: number) => void
   onEdit: (indice: number) => void
+  onSelect: (indiice: number) => void
 }
 
 export default function CardBody({
   nome,
   horasObjetivo,
+  horasEstudadas,
   status,
   id,
   indice,
   className,
   onDelete,
-  onEdit
+  onEdit,
+  onSelect
 }: CardBodyProps) {
   const formatNumber = (num: number): string => {
     return num.toString().padStart(2, '0')
@@ -38,10 +42,10 @@ export default function CardBody({
   }
 
   return (
-    <div onMouseDown={e => e.preventDefault()} className={`p-4 my-4 border-2 rounded-lg ${className}`}>
+    <div onMouseDown={e => e.preventDefault()} className={`p-4 my-4 border-2 rounded-lg ${className} `}>
       <div className='flex flex-col items-center'>
         <h1 className='text-base font-semibold text-light-text'>{nome}</h1>
-        <h2 className='text-base text-light-text mt-2'>{converteTempo(horasObjetivo)}</h2>
+        <h2 className='text-base text-light-text mt-2'>{converteTempo(horasObjetivo - horasEstudadas <= 0 ? 0 : horasObjetivo - horasEstudadas)}</h2>
         <div className='flex justify-around w-full mt-4'>
           <button
             onClick={() => onEdit(indice)}
@@ -55,7 +59,10 @@ export default function CardBody({
           >
             <FontAwesomeIcon icon={faTrash} />
           </button>
-          <button className='bg-transparent text-[#28c76f] p-2 hover:bg-[#28c76f] hover:bg-opacity-50'>
+          <button
+            onClick={() => onSelect(indice)}
+            className='bg-transparent text-[#28c76f] p-2 hover:bg-[#28c76f] hover:bg-opacity-50'
+          >
             <FontAwesomeIcon icon={faCheck} />
           </button>
         </div>
