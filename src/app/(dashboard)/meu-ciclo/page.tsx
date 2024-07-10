@@ -5,6 +5,7 @@ import api from '../../../../axiosConfig'
 import { GridContextProvider, GridDropZone, GridItem, swap, move } from 'react-grid-dnd'
 import CardBody from '@/components/meu-ciclo/CardBody'
 import Timercard from '@/components/meu-ciclo/timer/Timer'
+import { v4 as uuidv4 } from 'uuid';
 import Modal from './modalHoras/modalHoras'
 import { SettingsContext } from '@/@core/contexts/settingsContext'
 import { Disciplina, SelectedDisciplina } from '@/interfaces/meuCiclo'
@@ -13,16 +14,14 @@ export default function MeuCiclo() {
   const settingsContext = useContext(SettingsContext)
   const [disciplinas, setDisciplinas] = useState<Disciplina[]>([])
   const [selectedDisciplinas, setSelectedDisciplinas] = useState<SelectedDisciplina[]>([])
-  const [dadosTimer, setDadosTimer] = useState<{ disciplina: string; progressoInicial: number }>({
-    disciplina: '',
-    progressoInicial: 0
-  })
   const [currentDisciplina, setCurrentDisciplina] = useState<Disciplina | null>(null)
   const [modalOpen, setModalOpen] = useState<boolean>(false)
   const [draggingItem, setDraggingItem] = useState<string | null>(null)
   const [searchText, setSearchText] = useState<string>('')
   const [editingDisciplina, setEditingDisciplina] = useState<SelectedDisciplina | null>(null)
   const [disciplinaToEditIndex, setDisciplinaToEditIndex] = useState<number | null>(null)
+  const [disciplinaSelecionada, setDisciplinaSelecionada] = useState<SelectedDisciplina | null>();
+  const [resetTimer, setResetTimer] = useState(false);
 
   const [disciplinasKeys, setDisciplinasKeys] = useState<number[]>([])
   const [selectedDisciplinasKeys, setSelectedDisciplinasKeys] = useState<number[]>([])
@@ -34,7 +33,6 @@ export default function MeuCiclo() {
   const [systemMode, setSystemMode] = useState<'light' | 'dark'>(getSystemMode())
 
   const ciclo_id: string = '4ecb7ecf-c58d-4c87-a75b-af3f34dff50d'
-  // const ciclo_id: string = 'd76f6b53-2a97-4852-8bb5-16d37b9cb309'
 
   useEffect(() => {
     api.get(`/disciplina`).then(response => {
@@ -57,6 +55,7 @@ export default function MeuCiclo() {
       .then(response => {
         if (Array.isArray(response.data)) {
           setSelectedDisciplinas(response.data)
+          setDisciplinaSelecionada(response.data[0])
 
           const keys = []
           for (let i = 0; i < response.data.length; i++) keys.push(i)
@@ -75,7 +74,7 @@ export default function MeuCiclo() {
   }, [ciclo_id])
 
   useEffect(() => {
-    if (disciplinaToEditIndex) {
+    if (disciplinaToEditIndex !== null) {
       handleEdit(disciplinaToEditIndex)
       setDisciplinaToEditIndex(null)
     }
@@ -128,7 +127,7 @@ export default function MeuCiclo() {
         setCurrentDisciplina(item)
         const updatedTargetItems = [...selectedDisciplinas]
         updatedTargetItems.splice(targetIndex, 0, {
-          id: item.id,
+          id: uuidv4(),
           nome: item.nome,
           horas_objetivo: 0,
           horas_estudadas: 0,
@@ -151,6 +150,18 @@ export default function MeuCiclo() {
         const updatedWithIndices = updatedSourceItems.map((item, index) => ({ ...item, indice: index }))
         setSelectedDisciplinas(updatedWithIndices)
         setDisciplinas(updatedTargetItems)
+
+        let nulo = false
+
+        if(item.id === disciplinaSelecionada?.id){
+          setDisciplinaSelecionada(null);
+          setResetTimer(true);
+          nulo = true
+        }
+
+        if(nulo){
+          setDisciplinaSelecionada(updatedWithIndices[0])
+        }
 
         const selectedKeys = selectedDisciplinasKeys.filter((_, i) => i !== sourceIndex)
         setSelectedDisciplinasKeys(selectedKeys)
@@ -182,9 +193,21 @@ export default function MeuCiclo() {
     setModalOpen(false)
   }
   const handleDelete = (index: number) => {
+
+    let nulo = false;
+
+    if(index === disciplinaSelecionada?.indice){
+      setDisciplinaSelecionada(null);
+      setResetTimer(true);
+      nulo = true
+    }
+
     const updatedSelectedDisciplinas = selectedDisciplinas.filter(disciplina => disciplina.indice !== index)
     const updatedWithIndices = updatedSelectedDisciplinas.map((item, index) => ({ ...item, indice: index }))
     setSelectedDisciplinas(updatedWithIndices)
+    if(nulo){
+      setDisciplinaSelecionada(updatedWithIndices[0])
+    }
     console.log(updatedWithIndices)
 
     const keys = selectedDisciplinasKeys
@@ -198,6 +221,23 @@ export default function MeuCiclo() {
       setEditingDisciplina(disciplinaToEdit)
       setModalOpen(true)
     }
+  }
+
+  const handleSelect = (indice: number) => {
+    const disciplina = selectedDisciplinas.find(disciplina => disciplina.indice === indice);
+    if (disciplina) {
+      console.log(disciplina);
+      setDisciplinaSelecionada(disciplina);
+      setResetTimer(true);
+    }
+  };
+
+  const handleHorasEstudadasUpdate = (id: string, novasHorasEstudadas: number) => {
+    const updatedSelectedDisciplinas = selectedDisciplinas.map((disciplina, i) =>
+      disciplina.id === id ? { ...disciplina, horas_estudadas: novasHorasEstudadas } : disciplina
+    )
+    console.log(novasHorasEstudadas)
+    setSelectedDisciplinas(updatedSelectedDisciplinas)
   }
 
   if (!settingsContext) {
@@ -221,7 +261,7 @@ export default function MeuCiclo() {
     <div className={`flex space-x-4 ${getThemeClass()}`}>
       <GridContextProvider onChange={onChange}>
         <div className='flex flex-col space-y-4'>
-          <Timercard nome={dadosTimer.disciplina} horasObjetivo={0} horasEstudadas={dadosTimer.progressoInicial} />
+          <Timercard id={disciplinaSelecionada?.id} horasObjetivo={disciplinaSelecionada?.horas_objetivo} horasEstudadas={disciplinaSelecionada?.horas_estudadas} onHorasEstudadasUpadate={handleHorasEstudadasUpdate} resetTimer = {resetTimer} />
           <div className='p-4 rounded-lg dark:bg-dark text-light-text bg-white dark:text-dark-text'>
             <h2 className='dark:bg-dark bg-white text-[#5c55bb] text-base'>Todas as Disciplinas</h2>
             <input
@@ -259,12 +299,14 @@ export default function MeuCiclo() {
                 <CardBody
                   nome={disciplina.nome}
                   horasObjetivo={disciplina.horas_objetivo}
+                  horasEstudadas={disciplina.horas_estudadas}
                   status={disciplina.status}
                   id={disciplina.id}
-                  indice={index}
+                  indice={disciplina.indice}
                   className='bg-transparent m-2 cursor-pointer'
                   onDelete={handleDelete}
                   onEdit={handleEdit}
+                  onSelect={handleSelect}
                 />
               </GridItem>
             ))}
