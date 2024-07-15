@@ -6,8 +6,12 @@ import { GridContextProvider, GridDropZone, GridItem, swap, move } from 'react-g
 import CardBody from '@/components/meu-ciclo/CardBody'
 import Timercard from '@/components/meu-ciclo/timer/Timer'
 import Modal from './modalHoras/modalHoras'
+import ModalStatus from './modalTipoEstudos/ModalTipoEstudos'
 import { SettingsContext } from '@/@core/contexts/settingsContext'
 import { Disciplina, SelectedDisciplina } from '@/interfaces/meuCiclo'
+import StatusDisciplina from '@/enums/Status'
+import ModalReset from './modalReset/ModalReset'
+import Loading from '@/components/Loading/Loading'
 
 export default function MeuCiclo() {
   const settingsContext = useContext(SettingsContext)
@@ -26,6 +30,14 @@ export default function MeuCiclo() {
 
   const [disciplinasKeys, setDisciplinasKeys] = useState<number[]>([])
   const [selectedDisciplinasKeys, setSelectedDisciplinasKeys] = useState<number[]>([])
+
+  const [statusModalOpen, setStatusModalOpen] = useState<boolean>(false)
+
+  const [resetModalOpen, setResetModalOpen] = useState<boolean>(false)
+  const [canReset, setCanReset] = useState<boolean>(true)
+  const [reseted, setReseted] = useState<number>(0)
+
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   const getSystemMode = (): 'light' | 'dark' => {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -65,18 +77,30 @@ export default function MeuCiclo() {
           setSelectedDisciplinas([])
           console.error('API response is not an array:', response.data)
         }
+
+        setIsLoading(false)
       })
       .catch(error => {
         console.error('Error fetching selectedDisciplinas:', error)
         setSelectedDisciplinas([])
       })
-  }, [ciclo_id])
+  }, [ciclo_id, reseted])
 
   useEffect(() => {
+    console.log("teste reset")
     if (disciplinaToEditIndex) {
       handleEdit(disciplinaToEditIndex)
       setDisciplinaToEditIndex(null)
     }
+
+    const disciplinasFinalizadas = selectedDisciplinas.filter(
+      disciplina => disciplina.status === StatusDisciplina.FINALIZADA
+    )
+
+    if (selectedDisciplinas.length === 0 || disciplinasFinalizadas.length !== selectedDisciplinas.length || !canReset)
+      return
+
+    setResetModalOpen(true)
   }, [selectedDisciplinas])
 
   useEffect(() => {
@@ -137,7 +161,8 @@ export default function MeuCiclo() {
           horas_objetivo: 0,
           horas_estudadas: 0,
           status: 'nao-iniciada',
-          indice: keys[targetIndex]
+          indice: keys[targetIndex],
+          tipo_estudo: []
         })
 
         const updatedWithIndices = updatedTargetItems.map((item, index) => ({ ...item, indice: keys[index] }))
@@ -161,6 +186,49 @@ export default function MeuCiclo() {
         setDisciplinas(updatedTargetItems)
       }
     }
+  }
+
+  const handleStatusChange = (status: string, tipoEstudo?: string[]) => {
+    const handleRequest = async (editingDisciplina: SelectedDisciplina) => {
+      const token = localStorage.getItem('token')
+      const res = await api.put(
+        `/disciplina/${editingDisciplina.id}`,
+        {
+          ...editingDisciplina,
+          qtd_questoes: 1
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+
+      // console.log(res)
+    }
+
+    if (editingDisciplina) {
+      console.log(editingDisciplina.indice)
+      const updatedSelectedDisciplinas = selectedDisciplinas.map(disciplina =>
+        disciplina.indice === editingDisciplina.indice
+          ? {
+              ...disciplina,
+              status: status,
+              tipo_estudo: tipoEstudo ? tipoEstudo : disciplina.tipo_estudo
+            }
+          : disciplina
+      )
+
+      const requestDisciplina = updatedSelectedDisciplinas.find(
+        disciplina => disciplina.indice === editingDisciplina.indice
+      )
+
+      requestDisciplina && handleRequest(requestDisciplina)
+      setSelectedDisciplinas(updatedSelectedDisciplinas)
+      setEditingDisciplina(null)
+    }
+
+    setStatusModalOpen(false)
   }
 
   const handleModalSubmit = (horasObjetivo: number, horasEstudadas: number) => {
@@ -188,7 +256,8 @@ export default function MeuCiclo() {
           ? {
               ...disciplina,
               horas_objetivo: horasObjetivo,
-              horas_estudadas: horasEstudadas
+              horas_estudadas: horasEstudadas,
+              status: horasEstudadas > horasObjetivo ? 'finalizada' : disciplina.status
             }
           : disciplina
       )
@@ -202,6 +271,7 @@ export default function MeuCiclo() {
     }
     setModalOpen(false)
   }
+
   const handleDelete = (index: number) => {
     const keys = selectedDisciplinasKeys.filter(key => key !== index)
     setSelectedDisciplinasKeys(keys)
@@ -209,8 +279,6 @@ export default function MeuCiclo() {
     const updatedSelectedDisciplinas = selectedDisciplinas.filter(disciplina => disciplina.indice !== index)
     const updatedWithIndices = updatedSelectedDisciplinas.map((item, index) => ({ ...item, indice: keys[index] }))
     setSelectedDisciplinas(updatedWithIndices)
-
-    console.log(index, selectedDisciplinasKeys, keys, updatedWithIndices)
   }
 
   const handleEdit = (index: number) => {
@@ -220,6 +288,36 @@ export default function MeuCiclo() {
       setEditingDisciplina(disciplinaToEdit)
       setModalOpen(true)
     }
+  }
+
+  const handleCheck = (index: number) => {
+    const disciplinaToEdit = selectedDisciplinas.find(disciplina => disciplina.indice === index)
+    console.log(index, disciplinaToEdit?.indice)
+    if (disciplinaToEdit) {
+      setEditingDisciplina(disciplinaToEdit)
+      setStatusModalOpen(true)
+    }
+  }
+
+  const handleReset = () => {
+    setIsLoading(true)
+    const handleResetRequest = async () => {
+      const token = localStorage.getItem('token')
+      const res = await api
+        .patch(`/ciclo/${ciclo_id}/resetar`, null, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then((response) => {
+          console.log('reset', response)
+          setReseted(reseted + 1)
+        })
+
+    }
+
+    handleResetRequest()
+    setResetModalOpen(false)
   }
 
   if (!settingsContext) {
@@ -287,6 +385,7 @@ export default function MeuCiclo() {
                   className='bg-transparent m-2 cursor-pointer'
                   onDelete={handleDelete}
                   onEdit={handleEdit}
+                  onCheck={handleCheck}
                 />
               </GridItem>
             ))}
@@ -305,6 +404,24 @@ export default function MeuCiclo() {
           initialHorasEstudadas={editingDisciplina ? editingDisciplina.horas_estudadas : undefined}
         />
       )}
+      {statusModalOpen && (
+        <ModalStatus
+          onClose={() => {
+            setStatusModalOpen(false)
+          }}
+          onSubmit={handleStatusChange}
+        />
+      )}
+      {resetModalOpen && (
+        <ModalReset
+          onClose={() => {
+            setResetModalOpen(false)
+            setCanReset(false)
+          }}
+          onSubmit={handleReset}
+        />
+      )}
+      {<Loading isLoading={isLoading}/>}
     </div>
   )
 }

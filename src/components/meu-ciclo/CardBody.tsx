@@ -13,6 +13,7 @@ interface CardBodyProps {
   className?: string
   onDelete: (indice: number) => void
   onEdit: (indice: number) => void
+  onCheck: (indice: number) => void
 }
 
 export default function CardBody({
@@ -23,7 +24,8 @@ export default function CardBody({
   indice,
   className,
   onDelete,
-  onEdit
+  onEdit,
+  onCheck
 }: CardBodyProps) {
   const formatNumber = (num: number): string => {
     return num.toString().padStart(2, '0')
@@ -55,7 +57,8 @@ export default function CardBody({
           >
             <FontAwesomeIcon icon={faTrash} />
           </button>
-          <button className='bg-transparent text-[#28c76f] p-2 hover:bg-[#28c76f] hover:bg-opacity-50'>
+          <button onClick={() => { onCheck(indice) }} className='bg-transparent text-[#28c76f] p-2 hover:bg-[#28c76f] hover:bg-opacity-50'>
+
             <FontAwesomeIcon icon={faCheck} />
           </button>
         </div>
