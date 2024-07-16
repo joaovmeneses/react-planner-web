@@ -63,7 +63,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts"
-  ],
+, "src/app/(dashboard)/meu-ciclo/modalTipoEstudos"  ],
   "exclude": [
     "node_modules"
   ]

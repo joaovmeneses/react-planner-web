@@ -10,4 +10,5 @@ export interface SelectedDisciplina {
   horas_estudadas: number
   status: string
   indice: number
+  tipo_estudo: string[]
 }
