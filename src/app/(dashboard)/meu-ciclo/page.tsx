@@ -191,7 +191,7 @@ export default function MeuCiclo() {
   const handleStatusChange = (status: string, tipoEstudo?: string[]) => {
     const handleRequest = async (editingDisciplina: SelectedDisciplina) => {
       const token = localStorage.getItem('token')
-      const res = await api.put(
+      await api.put(
         `/disciplina/${editingDisciplina.id}`,
         {
           ...editingDisciplina,
@@ -204,22 +204,6 @@ export default function MeuCiclo() {
         }
       )
 
-        let nulo = false
-
-        if(item.id === disciplinaSelecionada?.id){
-          setDisciplinaSelecionada(null);
-          setResetTimer(true);
-          nulo = true
-        }
-
-        if(nulo){
-          setDisciplinaSelecionada(updatedWithIndices[0])
-        }
-
-        const selectedKeys = selectedDisciplinasKeys.filter((_, i) => i !== sourceIndex)
-        setSelectedDisciplinasKeys(selectedKeys)
-
-      // console.log(res)
     }
 
     if (editingDisciplina) {
@@ -272,7 +256,7 @@ export default function MeuCiclo() {
               ...disciplina,
               horas_objetivo: horasObjetivo,
               horas_estudadas: horasEstudadas,
-              status: horasEstudadas > horasObjetivo ? 'finalizada' : disciplina.status
+              status: horasEstudadas > horasObjetivo ? StatusDisciplina.FINALIZADA : disciplina.status
             }
           : disciplina
       )
@@ -309,10 +293,6 @@ export default function MeuCiclo() {
       setDisciplinaSelecionada(updatedWithIndices[0])
     }
     console.log(updatedWithIndices)
-
-    const keys = selectedDisciplinasKeys
-    keys.filter((_, i) => i !== index)
-    setSelectedDisciplinasKeys(keys)
 
   }
 
@@ -354,6 +334,7 @@ export default function MeuCiclo() {
 
     handleResetRequest()
     setResetModalOpen(false)
+  }
 
   const handleSelect = (indice: number) => {
     const disciplina = selectedDisciplinas.find(disciplina => disciplina.indice === indice);
