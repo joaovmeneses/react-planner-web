@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 
 // Next Imports
@@ -23,6 +23,8 @@ import Button from '@mui/material/Button'
 
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
+import api from '../../../../axiosConfig'
+import { capitalize } from '@mui/material'
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -34,7 +36,16 @@ const BadgeContentSpan = styled('span')({
   boxShadow: '0 0 0 2px var(--mui-palette-background-paper)'
 })
 
+interface User {
+  id: string;
+  name: string;
+  last_name: string;
+  email: string;
+}
+
 const UserDropdown = () => {
+  const [user, setUser] = useState<User>();
+
   // States
   const [open, setOpen] = useState(false)
 
@@ -75,6 +86,24 @@ const UserDropdown = () => {
     router.push('/login')
   }
 
+
+
+  useEffect(() => {
+    const getUserInfo = async () => {
+      const token = localStorage.getItem("token")
+
+      const res = await api.get('/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      setUser(res.data)
+    }
+
+    getUserInfo()
+  }, [])
+
   return (
     <>
       <Badge
@@ -114,7 +143,7 @@ const UserDropdown = () => {
                     <Avatar alt='John Doe' src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
-                        John Doe
+                        {user && `${capitalize(user?.name)} ${capitalize(user?.last_name)}`}
                       </Typography>
                       <Typography variant='caption'>{email}</Typography>
                     </div>
@@ -123,18 +152,6 @@ const UserDropdown = () => {
                   <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='tabler-user text-[22px]' />
                     <Typography color='text.primary'>My Profile</Typography>
-                  </MenuItem>
-                  <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='tabler-settings text-[22px]' />
-                    <Typography color='text.primary'>Settings</Typography>
-                  </MenuItem>
-                  <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='tabler-currency-dollar text-[22px]' />
-                    <Typography color='text.primary'>Pricing</Typography>
-                  </MenuItem>
-                  <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
-                    <i className='tabler-help-circle text-[22px]' />
-                    <Typography color='text.primary'>FAQ</Typography>
                   </MenuItem>
                   <div className='flex items-center plb-2 pli-3'>
                     <Button
