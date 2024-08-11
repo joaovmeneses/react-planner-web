@@ -46,7 +46,7 @@ const UserDropdown = () => {
 
   const { settings } = useSettings()
 
-  let email: String | null;
+  let email: string | null; 
 
   if (typeof window !== 'undefined') {
       email = localStorage.getItem("email");
@@ -117,7 +117,7 @@ const UserDropdown = () => {
                         John Doe
                       </Typography>
                       <Typography variant='caption'>{email}</Typography>
-                    </div>
+                    </div> 
                   </div>
                   <Divider className='mlb-1' />
                   <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>

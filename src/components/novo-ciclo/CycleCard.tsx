@@ -1,10 +1,11 @@
 'use client'
-import React, { ReactNode, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { FromZeroPayload } from '@/app/(dashboard)/novo-ciclo/page'
+import type { ReactNode} from 'react';
+import React, { useState } from 'react'
+
+import type { FromZeroPayload } from '@/app/(dashboard)/novo-ciclo/page'
 
 interface CardProps {
-  title: string
+  title: string 
   description?: string
   onSubmit?: (value: FromZeroPayload) => void
 }

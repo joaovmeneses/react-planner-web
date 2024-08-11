@@ -7,6 +7,8 @@
  */
 
 // MUI Imports
+import { Montserrat } from "next/font/google";
+ 
 import { deepmerge } from '@mui/utils'
 import type { Theme } from '@mui/material/styles'
 
@@ -17,7 +19,6 @@ import type { SystemMode } from '@core/types'
 // Core Theme Imports
 import coreTheme from '@core/theme'
 
-import { Montserrat } from "next/font/google";
 
 const montserrat = Montserrat({
   subsets: ["latin"],

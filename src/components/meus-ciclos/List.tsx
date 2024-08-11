@@ -1,9 +1,9 @@
-import { ChildrenType } from '@/@core/types'
-import React, { ReactNode } from 'react'
+import type { ReactNode } from 'react';
+import React from 'react'
 
 interface ListProps {
   children: ReactNode
-  title: string
+  title: string 
   headers: string[]
 }
 
