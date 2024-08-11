@@ -1,5 +1,6 @@
-import Switch from '@mui/material/Switch'
 import React, { useState, useEffect } from 'react'
+
+import Switch from '@mui/material/Switch'
 
 interface ModalProps {
   onClose: () => void
@@ -34,7 +35,7 @@ const Modal: React.FC<ModalProps> = ({
     setHours(initialHoursObjetivo)
     setMinutes(initialMinutesObjetivo)
     setSeconds(initialSecondsObjetivo)
-  }, [initialHorasObjetivo])
+  }, [initialHoursObjetivo, initialMinutesObjetivo, initialSecondsObjetivo])
 
   const handleSubmit = () => {
     const totalSeconds = hours * 3600 + minutes * 60 + seconds
@@ -49,6 +50,7 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
+
     if (/^\d*$/.test(value)) {
       setHours(Number(value))
     }
@@ -56,6 +58,7 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleMinutesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
+
     if (/^\d*$/.test(value) && Number(value) < 60) {
       setMinutes(Number(value))
     }
@@ -63,6 +66,7 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleSecondsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
+
     if (/^\d*$/.test(value) && Number(value) < 60) {
       setSeconds(Number(value))
     }
@@ -82,7 +86,15 @@ const Modal: React.FC<ModalProps> = ({
     }
 
     handleHoursSwitch()
-  }, [isHorasCorridas])
+  }, [
+    isHorasCorridas,
+    initialHoursObjetivo,
+    initialMinutesObjetivo,
+    initialSecondsObjetivo,
+    initialHoursEstudadas,
+    initialMinutesEstudadas,
+    initialSecondsEstudadas
+  ])
 
   return (
     <div className='fixed inset-0 flex items-center justify-center z-40 bg-black bg-opacity-50'>

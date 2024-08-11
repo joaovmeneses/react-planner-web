@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { useScratch } from 'react-use'
 
 interface LoadingProps {
   isLoading: boolean
 }
 
-const Loading = ({ isLoading }: LoadingProps) => {
+const Loading = ({ isLoading }: LoadingProps) => { 
   const positionRef = useRef<HTMLDivElement>(null)
   const [position, setPosition] = useState<number>()
 
@@ -13,20 +12,25 @@ const Loading = ({ isLoading }: LoadingProps) => {
     const handlePosition = () => {
       if (!positionRef.current) return
       const parentRect = positionRef.current.getBoundingClientRect()
+
       setPosition(parentRect.left)
     }
-
+  
     handlePosition()
-
+  
     if (positionRef.current === null) return
-
+  
+    
+    const currentRef = positionRef.current
+  
     const resizeObserver = new ResizeObserver(handlePosition)
-
-    resizeObserver.observe(positionRef.current)
-
+  
+    resizeObserver.observe(currentRef)
+  
     return () => {
-      if (positionRef.current === null) return
-      resizeObserver.unobserve(positionRef.current)
+      
+      if (currentRef === null) return
+      resizeObserver.unobserve(currentRef)
     }
   }, [isLoading])
 

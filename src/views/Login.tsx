@@ -16,10 +16,12 @@ import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
+ 
+import classnames from 'classnames'
+
 import api from '../../axiosConfig'
 
 // Third-party Imports
-import classnames from 'classnames'
 
 // Type Imports
 import type { SystemMode } from '@core/types'
@@ -87,6 +89,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = { email, password }
+
     api
       .post('/auth/login', data)
       .then(response => {

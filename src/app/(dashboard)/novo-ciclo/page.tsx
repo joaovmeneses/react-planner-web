@@ -1,12 +1,15 @@
 'use client'
-import Loading from '@/components/Loading/Loading'
-import CycleCard from '@/components/novo-ciclo/CycleCard'
 import React, { useState } from 'react'
-import api from '../../../../axiosConfig'
+
 import { useRouter } from 'next/navigation'
 
+import Loading from '@/components/Loading/Loading'
+import CycleCard from '@/components/novo-ciclo/CycleCard'
+import api from '../../../../axiosConfig'
+
+
 export interface FromZeroPayload {
-  nome: string
+  nome: string 
 }
 
 const NovoCiclo = () => {
@@ -16,6 +19,7 @@ const NovoCiclo = () => {
   const handleCreateFromZero = async (value: FromZeroPayload) => {
     setIsLoading(true)
     const token = localStorage.getItem('token')
+
     const res = await api.post('/ciclo', value, {
       headers: {
         Authorization: `Bearer ${token}`

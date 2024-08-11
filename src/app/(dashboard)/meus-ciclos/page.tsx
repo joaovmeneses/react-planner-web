@@ -1,11 +1,15 @@
 'use client'
+import React, { useEffect, useState } from 'react'
+
+import { useRouter } from 'next/navigation'
+
 import List from '@/components/meus-ciclos/List'
 import ListItem from '@/components/meus-ciclos/ListItem'
 import Modal from '@/components/meus-ciclos/ModalDelete'
-import React, { useEffect, useState } from 'react'
 import api from '../../../../axiosConfig'
-import { useRouter } from 'next/navigation'
-import useVerticalMenu from '@/@menu/hooks/useVerticalMenu'
+
+ 
+
 import Loading from '@/components/Loading/Loading'
 
 export interface Ciclo {
@@ -25,17 +29,22 @@ const MeusCiclos = () => {
 
   const getCiclos = async () => {
     const token = localStorage.getItem('token')
+
     const res = await api.get('/ciclo', {
       headers: {
         Authorization: `Bearer ${token}`
       }
     })
+
     const data = res.data
+
     setCiclos(data)
     setIsLoading(false)
   }
+
   const handleDelete = async (id: string) => {
     const token = localStorage.getItem('token')
+
     setIsLoading(true)
     setIsModalOpen(false)
     await api.delete(`/ciclo/${id}`, {

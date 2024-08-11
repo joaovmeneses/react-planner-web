@@ -1,19 +1,22 @@
 'use client'
+import React, { useEffect, useState } from 'react'
+
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { useEffect, useRef, useState } from 'react'
 
 interface ModalProps {
   onClose: () => void
   onSubmit: (id: string) => Promise<void>
-  id: string
+  id: string 
 }
 
 const ModalDelete = ({ onClose, onSubmit, id }: ModalProps) => {
   const [windowOrientation, setWindowOrientation] = useState(window.screen.orientation.type)
+
   const handleOrientation = () => {
     setWindowOrientation(window.screen.orientation.type)
   }
+
   useEffect(() => {
     handleOrientation()
 
@@ -23,7 +26,8 @@ const ModalDelete = ({ onClose, onSubmit, id }: ModalProps) => {
       window.screen.orientation.addEventListener('change', handleOrientation)
     }
   }, [])
-  return (
+  
+return (
     <>
       <div className='bg-backdrop backdrop-blur-sm fixed inset-0 w-full z-40' />
       <div className='fixed lg:absolute inset-0 flex justify-center items-center w-full z-50'>

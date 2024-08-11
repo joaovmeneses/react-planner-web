@@ -1,12 +1,11 @@
 import React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPlay, faTrash } from '@fortawesome/free-solid-svg-icons'
-import { Ciclo } from '@/app/(dashboard)/meus-ciclos/page'
+
+import type { Ciclo } from '@/app/(dashboard)/meus-ciclos/page'
 
 interface ListItemProps {
   item: Ciclo
   onDelete: () => void
-  onPlay: (id: string) => void
+  onPlay: (id: string) => void 
 }
 
 const ListItem = ({ item, onDelete, onPlay }: ListItemProps) => {

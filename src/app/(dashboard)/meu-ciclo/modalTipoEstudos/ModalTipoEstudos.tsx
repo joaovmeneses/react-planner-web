@@ -1,7 +1,9 @@
 'use client'
+import type { ChangeEvent} from 'react';
+import React, { useState } from 'react'
+ 
 import StatusDisciplina from '@/enums/Status'
 import TipoEstudos from '@/enums/TipoEstudos'
-import React, { ChangeEvent, useState } from 'react'
 
 interface ModalTipoDeEstudosProps {
   onClose: () => void
@@ -16,6 +18,7 @@ const ModalTipoEstudos = ({ onClose, onSubmit }: ModalTipoDeEstudosProps) => {
       tipos.push(e.target.value)
     } else {
       const updatedTipos = tipos.filter(element => element !== e.target.value)
+
       setTipos(updatedTipos)
     }
   }

@@ -10,7 +10,7 @@ interface TimercardProps {
   resetTimer: boolean;
 }
 
-const Timercard: React.FC<TimercardProps> = ({
+const Timercard: React.FC<TimercardProps> = ({ 
   id,
   horasObjetivo,
   horasEstudadas,
@@ -33,6 +33,7 @@ const Timercard: React.FC<TimercardProps> = ({
   const pausarTimer = () => {
     setPausado(true)
     const novasHorasEstudadas = horasEstudadas! + tempoEstudado
+
     onHorasEstudadasUpadate(id!, novasHorasEstudadas)
   }
 
@@ -54,16 +55,6 @@ const Timercard: React.FC<TimercardProps> = ({
     setPausado(true);
     setTempoEstudado(0);
   }, [id, resetTimer]);
-
-  const calcularPorcentagem = () => {
-    return ((horasObjetivo! - tempoRestante!) / horasObjetivo!) * 100
-  }
-
-  const timerBarProgres = {
-    width: `${calcularPorcentagem()}%`,
-    backgroundColor: 'purple',
-    height: '20px'
-  }
 
   return (
     <div className='w-64 h-48 bg-light dark:bg-dark text-light-text dark:text-dark-text rounded-lg shadow-lg'>

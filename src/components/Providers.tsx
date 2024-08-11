@@ -8,7 +8,7 @@ import ThemeProvider from '@components/theme'
 
 // Components Imports
 import AuthWrapper from './AuthWrapper'
-
+                            
 // Util Imports
 import { getDemoName, getMode, getSettingsFromCookie, getSystemMode } from '@core/utils/serverHelpers'
 
