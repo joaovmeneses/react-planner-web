@@ -22,9 +22,12 @@ import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
 
 // Hook Imports
+import { capitalize } from '@mui/material'
+
 import { useSettings } from '@core/hooks/useSettings'
 import api from '../../../../axiosConfig'
-import { capitalize } from '@mui/material'
+
+
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
