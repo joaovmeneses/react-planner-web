@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Next Imports
 import { useRouter } from 'next/navigation'
@@ -16,7 +16,7 @@ import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
- 
+
 import classnames from 'classnames'
 
 import api from '../../axiosConfig'
@@ -38,6 +38,7 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
+import { SettingsContext } from '@/@core/contexts/settingsContext'
 
 // Styled Custom Components
 const LoginIllustration = styled('img')(({ theme }) => ({
@@ -63,6 +64,13 @@ const MaskImg = styled('img')({
   zIndex: -1
 })
 
+interface IGradient {
+  dir: string,
+  from: string,
+  via: string,
+  to: string
+}
+
 const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
@@ -70,8 +78,8 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   // Vars
   const darkImg = '/images/pages/auth-mask-dark.png'
   const lightImg = '/images/pages/auth-mask-light.png'
-  const darkIllustration = '/images/illustrations/auth/v2-login-dark.png'
-  const lightIllustration = '/images/illustrations/auth/v2-login-light.png'
+  const darkIllustration = '/images/logo_dex.png'
+  const lightIllustration = '/images/logo_dex_claro.png'
   const borderedDarkIllustration = '/images/illustrations/auth/v2-login-dark-border.png'
   const borderedLightIllustration = '/images/illustrations/auth/v2-login-light-border.png'
 
@@ -124,14 +132,17 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     setError('')
   }
 
+
+
   return (
     <div className='flex bs-full justify-center'>
       <div
         className={classnames(
-          'flex bs-full items-center justify-center flex-1 min-bs-[100dvh] relative p-6 max-md:hidden',
+          'flex bs-full items-center justify-center flex-1 min-bs-[100dvh] relative p-6 max-md:hidden bg-gradient-to-tl',
           {
             'border-ie': settings.skin === 'bordered'
-          }
+          },
+          `${settings.mode === 'light' ? 'bg-gradient-to-tl from-light-gradient-min via-light-gradient-med to-light-gradient-max' : 'bg-gradient-to-l from-dark-gradient-min via-dark-gradient-med bg-dark-gradient-max'}`
         )}
       >
         <LoginIllustration src={characterIllustration} alt='character-illustration' />
@@ -144,25 +155,25 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
         )}
       </div>
       <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
-        <div className='absolute block-start-5 sm:block-start-[33px] inline-start-6 sm:inline-start-[38px]'>
+        {/* <div className='absolute block-start-5 sm:block-start-[33px] inline-start-6 sm:inline-start-[38px]'>
           <Logo />
-        </div>
+        </div> */}
         <div className='flex flex-col gap-6 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset] mbs-11 sm:mbs-14 md:mbs-0'>
           <div className='flex flex-col gap-1'>
-            <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}! 👋🏻`}</Typography>
-            <Typography>Please sign-in to your account and start the adventure</Typography>
+            <Typography variant='h4'>{`Bem-vindo(a) a ${themeConfig.templateName}! 👋🏻`}</Typography>
+            <Typography>Por favor, faça login para dar início aos seus estudos</Typography>
           </div>
           <form noValidate autoComplete='off' onSubmit={handleSubmit} className='flex flex-col gap-5'>
             <CustomTextField
               autoFocus
               fullWidth
-              label='Email or Username'
-              placeholder='Enter your email or username'
+              label='Email ou Nome de Usuário'
+              placeholder='Insira seu Email ou Nome de Usuário'
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
             />
             <CustomTextField
               fullWidth
-              label='Password'
+              label='Senha'
               placeholder='············'
               id='outlined-adornment-password'
               type={isPasswordShown ? 'text' : 'password'}
@@ -182,34 +193,19 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
               }}
             />
             <div className='flex justify-between items-center gap-x-3 gap-y-1 flex-wrap'>
-              <FormControlLabel control={<Checkbox />} label='Remember me' />
+              <FormControlLabel control={<Checkbox />} label='Lembrar de mim' />
               <Typography className='text-end' color='primary' component={Link}>
-                Forgot password?
+                Esqueceu sua senha?
               </Typography>
             </div>
             <Button fullWidth variant='contained' type='submit'>
               Login
             </Button>
             <div className='flex justify-center items-center flex-wrap gap-2'>
-              <Typography>New on our platform?</Typography>
-              <Typography component={Link} color='primary'>
-                Create an account
+              <Typography>Você é novo por aqui?</Typography>
+              <Typography color='primary'>
+              <Link href='/register'> Crie uma conta </Link>
               </Typography>
-            </div>
-            <Divider className='gap-2 text-textPrimary'>or</Divider>
-            <div className='flex justify-center items-center gap-1.5'>
-              <IconButton className='text-facebook' size='small'>
-                <i className='tabler-brand-facebook-filled' />
-              </IconButton>
-              <IconButton className='text-twitter' size='small'>
-                <i className='tabler-brand-twitter-filled' />
-              </IconButton>
-              <IconButton className='text-textPrimary' size='small'>
-                <i className='tabler-brand-github-filled' />
-              </IconButton>
-              <IconButton className='text-error' size='small'>
-                <i className='tabler-brand-google-filled' />
-              </IconButton>
             </div>
           </form>
         </div>
