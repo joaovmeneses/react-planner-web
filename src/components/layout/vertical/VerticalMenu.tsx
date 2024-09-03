@@ -74,9 +74,6 @@ const VerticalMenu = ({ scrollMenu }: Props) => {
         <MenuItem href='/home' icon={<i className='tabler-smart-home' />}>
           Home
         </MenuItem>
-        <MenuItem href='/meu-ciclo' icon={<i className='tabler-info-circle' />}>
-          meu ciclo
-        </MenuItem>
         <SubMenu label='Ciclos' icon={<i className='tabler-reload' />}>
           <MenuItem href='/meus-ciclos' icon={<i className='tabler-player-play' />}>
             <h4 className='card-title'>Meus Ciclos</h4>

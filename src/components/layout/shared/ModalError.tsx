@@ -8,6 +8,7 @@ interface ModalErrorProps {
 }
 
 const ModalError: React.FC<ModalErrorProps> = ({ error, handleClose }) => {
+  Modal.setAppElement('body')
   return (
     <Modal
       className="fixed inset-0 z-50 flex justify-center items-center bg-gray-800 bg-opacity-75"

@@ -13,6 +13,13 @@ import { useSettings } from '@core/hooks/useSettings'
 
 // Util Imports
 import { verticalLayoutClasses } from '@layouts/utils/layoutClasses'
+import { useEffect, useState } from 'react'
+
+interface IFooterContent {
+  image: string;
+  text: string;
+  textColor: string;
+}
 
 const FooterContent = () => {
   // Hooks
@@ -20,42 +27,53 @@ const FooterContent = () => {
   const { isBreakpointReached: isVerticalBreakpointReached } = useVerticalNav()
   const { isBreakpointReached: isHorizontalBreakpointReached } = useHorizontalNav()
 
-  // Vars
-  const isBreakpointReached =
-    settings.layout === 'vertical' ? isVerticalBreakpointReached : isHorizontalBreakpointReached
+  const [content, setContent] = useState<IFooterContent>();
+
+  const [preferedSystemMode, setPreferedSystemMode] = useState<'light' | 'dark'>('dark')
+
+  const getSystemMode = (): 'light' | 'dark' => {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+
+
+  useEffect(() => {
+    const handleSystemModeChange = (e: MediaQueryListEvent) => {
+      setPreferedSystemMode(e.matches ? 'dark' : 'light')
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+    mediaQuery.addEventListener('change', handleSystemModeChange)
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemModeChange)
+    }
+  }, [])
+
+  useEffect(() => {
+    setPreferedSystemMode(getSystemMode())
+  }, [settings.mode])
+
+  useEffect(() => {
+    setContent({
+      text: `© ${new Date().getFullYear()}, Feito com ❤️ por `,
+      image: `${settings.mode === 'dark' || settings.mode === 'system' && preferedSystemMode === 'dark' ? '/images/byron_logo.png' : '/images/byron_logo_claro.png'}`,
+      textColor: `${settings.mode === 'dark' || settings.mode === 'system' && preferedSystemMode === 'dark' ? 'text-white' : 'text-black'}`
+    })
+  }, [settings.mode, preferedSystemMode])
 
   return (
     <div
-      className={classnames(verticalLayoutClasses.footerContent, 'flex items-center justify-between flex-wrap gap-4')}
+      className={classnames(verticalLayoutClasses.footerContent, 'flex items-center justify-center md:justify-start flex-wrap gap-2')}
     >
+      <p className='pb-1'>
+        <span className={`${content?.textColor} text-lg`}>{content?.text}</span>
+      </p>
       <p>
-        <span className='text-textSecondary'>{`© ${new Date().getFullYear()}, Made with `}</span>
-        <span>{`❤️`}</span>
-        <span className='text-textSecondary'>{` by `}</span>
-        <Link href='https://pixinvent.com' target='_blank' className='text-primary uppercase'>
-          Pixinvent
+        <Link href='https://byronsolutions.com' target='_blank' className='text-primary lowercase flex justify-center md:justify-start'>
+          <img src={content?.image} alt="byron.solutions" className='w-2/3 sm:w-11/12 md:w-3/5'/>
         </Link>
       </p>
-      {!isBreakpointReached && (
-        <div className='flex items-center gap-4'>
-          <Link href='https://themeforest.net/licenses/standard' target='_blank' className='text-primary'>
-            License
-          </Link>
-          <Link href='https://themeforest.net/user/pixinvent/portfolio' target='_blank' className='text-primary'>
-            More Themes
-          </Link>
-          <Link
-            href='https://demos.pixinvent.com/vuexy-nextjs-admin-template/documentation'
-            target='_blank'
-            className='text-primary'
-          >
-            Documentation
-          </Link>
-          <Link href='https://pixinvent.ticksy.com' target='_blank' className='text-primary'>
-            Support
-          </Link>
-        </div>
-      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 // Next Imports
 // import Img from 'next/image'
@@ -68,11 +68,40 @@ const Logo = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isHovered, layout])
 
+  const [preferedSystemMode, setPreferedSystemMode] = useState<'light' | 'dark'>('dark')
+  const [logo, setLogo] = useState<string>('')
+
+  const getSystemMode = (): 'light' | 'dark' => {
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  }
+  useEffect(() => {
+    const handleSystemModeChange = (e: MediaQueryListEvent) => {
+      setPreferedSystemMode(e.matches ? 'dark' : 'light')
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+
+    mediaQuery.addEventListener('change', handleSystemModeChange)
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleSystemModeChange)
+    }
+  }, [])
+
+  useEffect(() => {
+    setPreferedSystemMode(getSystemMode())
+  }, [settings.mode])
+
+  useEffect(() => {
+    setLogo(settings.mode === 'dark' || settings.mode === 'system' && preferedSystemMode === 'dark' ? '/images/logo_dex.png' : '/images/logo_dex_allblack.png')
+  }, [settings.mode, preferedSystemMode])
+
   // You may return any JSX here to display a logo in the sidebar header
   // return <Img src='/next.svg' width={100} height={25} alt='logo' /> // for example
   return (
     <Link href='/' className='flex items-center'>
-      <VuexyLogo className='text-2xl text-primary' />
+      {/* <VuexyLogo className='text-2xl text-primary' /> */}
+      {/*
       <LogoText
         ref={logoTextRef}
         isHovered={isHovered}
@@ -80,7 +109,8 @@ const Logo = () => {
         transitionDuration={transitionDuration}
       >
         {themeConfig.templateName}
-      </LogoText>
+      </LogoText> */}
+      <img src={logo} alt="" className='w-1/2'/>
     </Link>
   )
 }
