@@ -29,6 +29,10 @@ const NovoCiclo = () => {
     router.push(`/meu-ciclo/${res.data.id}`)
   }
 
+  const handleCreateFromConcurso = async () => {
+    router.push('/novo-ciclo/por-concurso');
+  };
+
   return (
     <>
       <div className='flex flex-col gap-10'>
@@ -55,6 +59,7 @@ const NovoCiclo = () => {
             <CycleCard
               title='Ciclo por Concurso'
               description='Escolha seu concurso e crie um ciclo de estudos baseado nele. Nesse modelo, selecionamos as matérias mais relevantes e organizamos um plano de estudos eficiente para você. Esta opção é perfeita para quem deseja um guia estruturado e otimizado para o concurso escolhido e que pode ser adaptado de acordo com suas necessidades, garantindo que você foque nos tópicos mais importantes e maximize seu desempenho. Clique no botão para começar e deixe a gente ajudar você a alcançar seus objetivos.'
+              onSubmit={handleCreateFromConcurso}
             />
           </div>
         </section>
