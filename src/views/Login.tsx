@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 // Next Imports
 import { useRouter } from 'next/navigation'
@@ -15,7 +15,6 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import Divider from '@mui/material/Divider'
 
 import classnames from 'classnames'
 
@@ -28,7 +27,6 @@ import type { SystemMode } from '@core/types'
 
 // Component Imports
 import Link from '@components/Link'
-import Logo from '@components/layout/shared/Logo'
 import CustomTextField from '@core/components/mui/TextField'
 import ModalError from '@/components/layout/shared/ModalError'
 
@@ -38,7 +36,6 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
-import { SettingsContext } from '@/@core/contexts/settingsContext'
 
 // Styled Custom Components
 const LoginIllustration = styled('img')(({ theme }) => ({
@@ -63,13 +60,6 @@ const MaskImg = styled('img')({
   insetBlockEnd: 0,
   zIndex: -1
 })
-
-interface IGradient {
-  dir: string,
-  from: string,
-  via: string,
-  to: string
-}
 
 const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   // States

@@ -1,4 +1,5 @@
 'use client'
+import { useEffect, useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -7,13 +8,12 @@ import Link from 'next/link'
 import classnames from 'classnames'
 
 // Hook Imports
-import useVerticalNav from '@menu/hooks/useVerticalNav'
-import useHorizontalNav from '@menu/hooks/useHorizontalNav'
 import { useSettings } from '@core/hooks/useSettings'
 
 // Util Imports
 import { verticalLayoutClasses } from '@layouts/utils/layoutClasses'
-import { useEffect, useState } from 'react'
+
+
 
 interface IFooterContent {
   image: string;
@@ -24,8 +24,6 @@ interface IFooterContent {
 const FooterContent = () => {
   // Hooks
   const { settings } = useSettings()
-  const { isBreakpointReached: isVerticalBreakpointReached } = useVerticalNav()
-  const { isBreakpointReached: isHorizontalBreakpointReached } = useHorizontalNav()
 
   const [content, setContent] = useState<IFooterContent>();
 
