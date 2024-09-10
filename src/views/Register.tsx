@@ -12,23 +12,19 @@ import { styled, useTheme } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
-import Checkbox from '@mui/material/Checkbox'
 import Button from '@mui/material/Button'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Divider from '@mui/material/Divider'
 
 import classnames from 'classnames'
 
-import api from '../../axiosConfig'
+import { object, string } from 'yup'
 
-// Third-party Imports
+import type {StringSchema} from 'yup'
 
 // Type Imports
 import type { SystemMode } from '@core/types'
 
 // Component Imports
 import Link from '@components/Link'
-import Logo from '@components/layout/shared/Logo'
 import CustomTextField from '@core/components/mui/TextField'
 import ModalError from '@/components/layout/shared/ModalError'
 
@@ -38,9 +34,8 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
-import { SettingsContext } from '@/@core/contexts/settingsContext'
 
-import { object, ref, Schema, string, StringSchema } from 'yup'
+import api from '../../axiosConfig'
 
 // Styled Custom Components
 const LoginIllustration = styled('img')(({ theme }) => ({
@@ -65,13 +60,6 @@ const MaskImg = styled('img')({
   insetBlockEnd: 0,
   zIndex: -1
 })
-
-interface IGradient {
-  dir: string,
-  from: string,
-  via: string,
-  to: string
-}
 
 interface IFormField
 {
@@ -121,7 +109,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setNameField({...nameField, error: err.message})
     })
-  }, [name])
+  }, [nameField, name])
 
     const [lastNameField, setLastNameField] = useState<IFormField>({
     schema: string().required("Campo não pode estar vazio.").min(4, 'Campo deve conter ao menos 4 caracteres'),
@@ -136,7 +124,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setLastNameField({...lastNameField, error: err.message})
     })
-  }, [lastName])
+  }, [lastName, lastNameField])
 
   const [emailField, setEmailField] = useState<IFormField>({
     schema: string().required("Campo não pode estar vazio.").matches(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Esse campo deve ser preenchido com um email valido"),
@@ -151,7 +139,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setEmailField({...emailField, error: err.message})
     })
-  }, [email])
+  }, [email, emailField])
 
   const [passwordField, setPasswordField] = useState<IFormField>({
     schema: string().required("Campo não pode estar vazio."),
@@ -166,7 +154,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setPasswordField({...passwordField, error: err.message})
     })
-  }, [password])
+  }, [password, passwordField])
 
   const [passwordConfirmationField, setPasswordConfirmationField] = useState<IFormField>({
     schema: string().required("Campo não pode estar vazio.").oneOf([password], "Os campos de senha não coincidem."),
@@ -184,7 +172,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setPasswordConfirmationField({...passwordConfirmationField, error: err.message})
     })
-  }, [passwordConfirmation, password])
+  }, [passwordConfirmation, password, passwordConfirmationField])
 
   // fazer requisição certa e revisar a presença de erros antes de permitir a requisição
 

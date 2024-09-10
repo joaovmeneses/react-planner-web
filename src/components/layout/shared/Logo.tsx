@@ -7,47 +7,17 @@ import { useEffect, useRef, useState } from 'react'
 // import Img from 'next/image'
 import Link from 'next/link'
 
-// Third-party Imports
-import styled from '@emotion/styled'
-
-// Type Imports
-import type { VerticalNavContextProps } from '@menu/contexts/verticalNavContext'
-
-// Component Imports
-import VuexyLogo from '@core/svg/Logo'
-
-// Config Imports
-import themeConfig from '@configs/themeConfig'
-
 // Hook Imports
 import useVerticalNav from '@menu/hooks/useVerticalNav'
 import { useSettings } from '@core/hooks/useSettings'
 
-type LogoTextProps = {
-  isHovered?: VerticalNavContextProps['isHovered']
-  isCollapsed?: VerticalNavContextProps['isCollapsed']
-  transitionDuration?: VerticalNavContextProps['transitionDuration']
-}
-
-const LogoText = styled.span<LogoTextProps>`
-  font-size: 1.375rem;
-  line-height: 1.09091;
-  font-weight: 700;
-  letter-spacing: 0.25px;
-  color: var(--mui-palette-text-primary);
-  transition: ${({ transitionDuration }) =>
-    `margin-inline-start ${transitionDuration}ms ease-in-out, opacity ${transitionDuration}ms ease-in-out`};
-
-  ${({ isHovered, isCollapsed }) =>
-    isCollapsed && !isHovered ? 'opacity: 0; margin-inline-start: 0;' : 'opacity: 1; margin-inline-start: 12px;'}
-`
 
 const Logo = () => {
   // Refs
   const logoTextRef = useRef<HTMLSpanElement>(null)
 
   // Hooks
-  const { isHovered, transitionDuration } = useVerticalNav()
+  const { isHovered} = useVerticalNav()
   const { settings } = useSettings()
 
   // Vars
@@ -74,6 +44,7 @@ const Logo = () => {
   const getSystemMode = (): 'light' | 'dark' => {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
   }
+
   useEffect(() => {
     const handleSystemModeChange = (e: MediaQueryListEvent) => {
       setPreferedSystemMode(e.matches ? 'dark' : 'light')

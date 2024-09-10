@@ -1,10 +1,16 @@
 import type { Contest, CicloData } from "@/interfaces/PerCycle";
 import api from "../../axiosConfig";
 
-const token = localStorage.getItem('token');
+const getToken = () => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem('token');
+  }
+
+  return null; 
+}
 
 const config = {
-  headers: { Authorization: `Bearer ${token}` } 
+  headers: { Authorization: `Bearer ${getToken}` } 
 };
 
 export const getUserId = async () => {
