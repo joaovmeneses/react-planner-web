@@ -146,7 +146,7 @@ const UserDropdown = () => {
                     <Avatar alt='John Doe' src='/images/avatars/1.png' />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
-                        {user && `${capitalize(user?.name)} ${capitalize(user?.last_name)}`}
+                        {user && `${capitalize(user?.name || '')} ${capitalize(user?.last_name || '')}`}
                       </Typography>
                       <Typography variant='caption'>{email}</Typography>
                     </div> 

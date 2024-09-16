@@ -10,7 +10,7 @@ const getToken = () => {
 }
 
 const config = {
-  headers: { Authorization: `Bearer ${getToken}` } 
+  headers: { Authorization: `Bearer ${getToken()}` } 
 };
 
 export const getUserId = async () => {
