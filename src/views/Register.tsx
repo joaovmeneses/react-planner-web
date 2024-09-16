@@ -109,7 +109,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setNameField({...nameField, error: err.message})
     })
-  }, [nameField, name])
+  }, [name])
 
     const [lastNameField, setLastNameField] = useState<IFormField>({
     schema: string().required("Campo não pode estar vazio.").min(4, 'Campo deve conter ao menos 4 caracteres'),
@@ -124,7 +124,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setLastNameField({...lastNameField, error: err.message})
     })
-  }, [lastName, lastNameField])
+  }, [lastName])
 
   const [emailField, setEmailField] = useState<IFormField>({
     schema: string().required("Campo não pode estar vazio.").matches(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Esse campo deve ser preenchido com um email valido"),
@@ -139,7 +139,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setEmailField({...emailField, error: err.message})
     })
-  }, [email, emailField])
+  }, [email])
 
   const [passwordField, setPasswordField] = useState<IFormField>({
     schema: string().required("Campo não pode estar vazio."),
@@ -154,7 +154,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setPasswordField({...passwordField, error: err.message})
     })
-  }, [password, passwordField])
+  }, [password])
 
   const [passwordConfirmationField, setPasswordConfirmationField] = useState<IFormField>({
     schema: string().required("Campo não pode estar vazio.").oneOf([password], "Os campos de senha não coincidem."),
@@ -172,7 +172,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
     }).catch((err) => {
       setPasswordConfirmationField({...passwordConfirmationField, error: err.message})
     })
-  }, [passwordConfirmation, password, passwordConfirmationField])
+  }, [passwordConfirmation, password])
 
   // fazer requisição certa e revisar a presença de erros antes de permitir a requisição
 
