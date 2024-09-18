@@ -30,7 +30,7 @@ export default function AuthWrapper({ children }: Props) {
         checkAuthentication();
     }, [router]);
 
-    if (loading && pathname !== '/login') {
+    if (loading && pathname !== '/login' && pathname !== '/register') {
         return (
             <div className="fixed top-0 left-0 w-full h-full flex justify-center items-center bg-[#7367f0] bg-opacity-75 z-50">
                 <div className="bg-[#4c43b9] rounded-lg p-8 max-w-md">
