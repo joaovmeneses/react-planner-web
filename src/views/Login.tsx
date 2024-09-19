@@ -36,6 +36,7 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
+import Loading from '@/components/Loading/Loading'
 
 // Styled Custom Components
 const LoginIllustration = styled('img')(({ theme }) => ({
@@ -84,10 +85,12 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = { email, password }
-
+    setIsLoading(true)
     api
       .post('/auth/login', data)
       .then(response => {
@@ -96,6 +99,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
         router.push('/home')
       })
       .catch(error => {
+        setIsLoading(false)
         if (error.response && error.response.status === 400 && error.response.data.message === 'Senha incorreta.') {
           setError('Email ou senha errado.')
         } else if (
@@ -188,8 +192,8 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
                 Esqueceu sua senha?
               </Typography>
             </div>
-            <Button fullWidth variant='contained' type='submit'>
-              Login
+            <Button fullWidth variant='contained' type='submit' className='overflow-hidden'>
+              {!isLoading ? `Login` : <div className='text-white text-3xl animate-spin rounded-full tabler-loader-2' />}
             </Button>
             <div className='flex justify-center items-center flex-wrap gap-2'>
               <Typography>Você é novo por aqui?</Typography>

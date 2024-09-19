@@ -96,6 +96,8 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   const [lastName, setLastName] = useState('')
   const [error, setError] = useState('')
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const [nameField, setNameField] = useState<IFormField>({
     schema: string().required("Campo não pode estar vazio.").min(4, 'Campo deve conter ao menos 4 caracteres'),
     error: '',
@@ -192,7 +194,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = { email, password, name, last_name: lastName }
-
+    setIsLoading(true)
 
     validateFields().then(() => {
 
@@ -205,7 +207,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
 
       })
       .catch(error => {
-
+        setIsLoading(false)
         if (
           error.response
        && error.response.status === 400
@@ -223,7 +225,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
       })
 
     }).catch(() => {
-
+      setIsLoading(false)
       setError("Campos Inválidos. Verifique o preenchimento e tente novamente.")
 
     })
@@ -395,8 +397,8 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
               <p className='text-red-500'>{(passwordConfirmationField.seen || passwordConfirmationField.focused) && passwordConfirmationField.error}</p>
             </div>
             <p className='text-center text-secondary'>Ao se cadastrar, você concorda com os termos e políticas de privacidade</p>
-            <Button fullWidth variant='contained' type='submit'>
-              Cadastrar
+            <Button fullWidth variant='contained' type='submit' className='overflow-hidden'>
+            {!isLoading ? `Cadastrar` : <div className='text-white text-3xl animate-spin rounded-full tabler-loader-2' />}
             </Button>
             <div className='flex justify-center items-center flex-wrap gap-2'>
               <Typography>Já tem uma conta?</Typography>
