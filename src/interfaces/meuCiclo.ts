@@ -1,6 +1,7 @@
 export interface Disciplina {
   id: string
   nome: string
+  qtd_questoes: number
 }
 
 export interface SelectedDisciplina {

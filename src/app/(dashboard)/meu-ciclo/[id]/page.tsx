@@ -55,49 +55,52 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     const token = localStorage.getItem('token');
 
     const config = {
-      headers: { Authorization: `Bearer ${token}` } 
+      headers: { Authorization: `Bearer ${token}` }
     };
-  
+
     api.get(`/disciplina`, config).then(response => {
+      console.log(response)
       const disciplinasFiltradas = response.data.map((disciplina: any) => ({
         id: disciplina._id,
-        nome: disciplina.nome
+        nome: disciplina.nome,
+        qtd_questoes: disciplina.qtd_questoes
       }));
-  
+
       disciplinasFiltradas.shift();
       setDisciplinas(disciplinasFiltradas);
-  
+
       const keys = [];
-  
+
       for (let i = 0; i < disciplinasFiltradas.length; i++) keys.push(i);
       setDisciplinasKeys(keys);
     });
-  
+
     api
       .get(`/disciplina/ciclo/${id}`, config)
       .then(response => {
         if (Array.isArray(response.data)) {
           setSelectedDisciplinas(response.data);
           setDisciplinaSelecionada(response.data[0]);
-  
+
           const keys = [];
-  
+
           for (let i = 0; i < response.data.length; i++) keys.push(response.data[i].indice);
           setSelectedDisciplinasKeys(keys);
-  
+
           console.log('res:', response.data);
         } else {
           setSelectedDisciplinas([]);
           console.error('API response is not an array:', response.data);
         }
-  
+
         setIsLoading(false);
       })
       .catch(error => {
         console.error('Error fetching selectedDisciplinas:', error);
         setSelectedDisciplinas([]);
+
       });
-  }, [id, reseted]);  
+  }, [id, reseted]);
 
   useEffect(() => {
     if (disciplinaToEditIndex !== null) {
@@ -141,10 +144,10 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   const updateIndex = async (disciplina: SelectedDisciplina) => {
     const token = localStorage.getItem('token');
     const config = { headers: { Authorization: `Bearer ${token}` } };
-  
+
     try {
-      const res = await api.patch(`/disciplina/${disciplina.id}/atualiza-indice`, {
-        novo_indice: disciplina.indice
+      const res = await api.patch(`/ciclo/${id}/disciplinas/${disciplina.id}/indice`, {
+        novoIndice: disciplina.indice
       }, config);
 
       console.log('res:', res.data);
@@ -189,14 +192,14 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
       if (sourceId === 'disciplinas' && targetId === 'selectedDisciplinas') {
         const keys = selectedDisciplinasKeys;
         const newKey = Math.max(...keys, -1) + 1;
-    
+
         keys.splice(targetIndex, 0, newKey);
         setSelectedDisciplinasKeys(keys);
-    
+
         const item = disciplinas[sourceIndex];
-    
+
         setCurrentDisciplina(item);
-    
+
         // Crear la disciplina temporal con el índice correcto
         const tempDisciplina = {
           id: uuidv4(),
@@ -207,46 +210,49 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
           indice: targetIndex,
           tipo_estudo: []
         };
-    
+
         const updatedTargetItems = [...selectedDisciplinas];
 
         updatedTargetItems.splice(targetIndex, 0, tempDisciplina);
         setSelectedDisciplinas(updatedTargetItems);
-    
-        setDisciplinaToEditIndex(targetIndex);
-    
+
+
+
         try {
           const newDisciplina = {
-            ciclo_id: id,
             nome: item.nome,
             horas_objetivo: 0,
             indice: targetIndex // Establece el índice correcto desde el principio
           };
-    
+
           const token = localStorage.getItem('token');
-    
+
           const config = {
             headers: { Authorization: `Bearer ${token}` }
           };
-    
+
           // Enviar la nueva disciplina al backend
-          const response = await api.post('/disciplina', newDisciplina, config);
-          const savedDisciplina = response.data;
-    
+          const response = await api.post(`/ciclo/${id}/disciplinas`, newDisciplina, config);
+          const savedDisciplina = response.data.disciplinas.find((item : any) => item.indice === targetIndex);
+
           // Actualiza la disciplina en el frontend con los datos del backend
           const finalUpdatedTargetItems = updatedTargetItems.map(disciplina =>
             disciplina.id === tempDisciplina.id
               ? { ...savedDisciplina } // Sustituye el temporal por el guardado en el backend
               : disciplina
           );
-    
+
+          setDisciplinaToEditIndex(targetIndex);
           setSelectedDisciplinas(finalUpdatedTargetItems);
-    
+
           if (savedDisciplina) {
             // Actualiza solo la disciplina que ha cambiado de índice en el backend
             await updateIndex(savedDisciplina);
           }
-    
+
+          console.log(finalUpdatedTargetItems)
+
+
           console.log('Disciplina guardada, actualizada y índice sincronizado:', savedDisciplina);
         } catch (error) {
           console.error('Erro guardando a disciplina:', error);
@@ -265,14 +271,16 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         const updatedSourceItems = selectedDisciplinas.filter((_, idx) => idx !== sourceIndex)
         const updatedTargetItems = [...disciplinas]
 
-        updatedTargetItems.splice(targetIndex, 0, { id: item.id, nome: item.nome })
+        const qtd_questoes = disciplinas.find(disciplina => disciplina.nome === item.nome)?.qtd_questoes
+
+        updatedTargetItems.splice(targetIndex, 0, { id: item.id, nome: item.nome, qtd_questoes: qtd_questoes? qtd_questoes : 0 })
         const updatedWithIndices = updatedSourceItems.map((item, index) => ({ ...item, indice: index }))
 
         setSelectedDisciplinas(updatedWithIndices)
         setDisciplinas(updatedTargetItems)
-        
+
         const changedDisciplina = updatedWithIndices[targetIndex];
-        
+
         await updateIndex(changedDisciplina);
       }
     }
@@ -282,11 +290,13 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     const handleRequest = async (editingDisciplina: SelectedDisciplina) => {
       const token = localStorage.getItem('token')
 
+      const disciplina = disciplinas.find(disciplina => disciplina.nome === editingDisciplina.nome)
+
       await api.put(
         `/disciplina/${editingDisciplina.id}`,
         {
           ...editingDisciplina,
-          qtd_questoes: 1
+          qtd_questoes: disciplina?.qtd_questoes
         },
         {
           headers: {
@@ -325,11 +335,13 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     const handleEditionRequest = async (editingDisciplina: SelectedDisciplina) => {
       const token = localStorage.getItem('token')
 
+      const disciplina = disciplinas.find(disciplina => disciplina.nome === editingDisciplina.nome)
+
       const res = await api.put(
         `/disciplina/${editingDisciplina.id}`,
         {
           ...editingDisciplina,
-          qtd_questoes: 1
+          qtd_questoes: disciplina?.qtd_questoes
         },
         {
           headers: {
@@ -338,7 +350,6 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         }
       )
 
-      console.log(res)
     }
 
     if (editingDisciplina) {
@@ -369,33 +380,35 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     try {
       // Encuentra la disciplina que se va a eliminar
       const disciplinaToDelete = selectedDisciplinas.find(disciplina => disciplina.indice === index);
-  
+
       if (!disciplinaToDelete) {
         console.error('Disciplina no encontrada');
 
         return;
       }
-  
+
       const token = localStorage.getItem('token');
 
       const config = {
         headers: { Authorization: `Bearer ${token}` }
       };
-  
+
       // Crea una copia de la lista de disciplinas y mueve la que se eliminará al final de la lista
       const updatedSelectedDisciplinas = [...selectedDisciplinas];
 
       updatedSelectedDisciplinas.splice(index, 1); // Elimina la disciplina de su posición actual
       disciplinaToDelete.indice = updatedSelectedDisciplinas.length; // Asigna el nuevo índice (último)
       updatedSelectedDisciplinas.push(disciplinaToDelete); // La agrega al final
-  
+
+      console.log(disciplinaToDelete, updatedSelectedDisciplinas);
+
       // Actualiza el índice en el backend sin modificar el estado en el frontend
       await updateIndex(disciplinaToDelete);
-  
+
       // Después de actualizar el backend, realiza la eliminación en el frontend
       const finalSelectedDisciplinas = selectedDisciplinas.filter((_, i) => i !== index);
       const updatedWithIndices = finalSelectedDisciplinas.map((item, i) => ({ ...item, indice: i }));
-      
+
       // Si la disciplina eliminada es la seleccionada, manejar la lógica de resetear el cronómetro
       let nulo = false;
 
@@ -404,23 +417,22 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         setResetTimer(true);
         nulo = true;
       }
-  
+
       // Actualiza las claves
       const updatedKeys = selectedDisciplinasKeys.filter(key => key !== index);
 
       setSelectedDisciplinasKeys(updatedKeys);
-  
+
       // Actualiza el estado en el frontend
       setSelectedDisciplinas(updatedWithIndices);
-  
+
       // Elimina la disciplina del backend ahora que su índice ha sido actualizado
-      await api.delete(`/disciplina/${disciplinaToDelete.id}`, config);
-  
+      await api.delete(`/ciclo/${id}/disciplinas/${disciplinaToDelete.id}`, config);
+
       // Si la disciplina eliminada era la seleccionada, selecciona la primera en la lista actualizada
       if (nulo && updatedWithIndices.length > 0) {
         setDisciplinaSelecionada(updatedWithIndices[0]);
       }
-  
     } catch (error) {
       console.error('Error deleting disciplina:', error);
     }
