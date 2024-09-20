@@ -131,17 +131,6 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     }
   }, [])
 
-  function debounce<T extends (...args: any[]) => void>(func: T, delay: number): (...args: Parameters<T>) => void {
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-    
-    return (...args:Parameters<T>) => {
-          if (timeoutId) clearTimeout(timeoutId);
-          timeoutId = setTimeout(() => {
-            func(...args);
-          }, delay);
-        };
-    }
-
   const keysSwap = (keys: number[], sourceIndex: number, targetIndex: number) => {
     const temp = keys[sourceIndex]
 
@@ -151,19 +140,20 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     return keys
   }
 
-  const debounceUpdateIndex = debounce(async (disciplina:SelectedDisciplina) => {
+  const updateIndex = async (disciplina: SelectedDisciplina) => {
     const token = localStorage.getItem('token');
     const config = { headers: { Authorization: `Bearer ${token}` } };
-  
+
     try {
-      await api.patch(`/ciclo/${id}/disciplinas/${disciplina.id}/indice`, {
+      const res = await api.patch(`/ciclo/${id}/disciplinas/${disciplina.id}/indice`, {
         novoIndice: disciplina.indice
       }, config);
-  
+
+      console.log('res:', res.data);
     } catch (error) {
       console.error('Erro ao atualizar índice:', error);
     }
-  }, 500);
+  }
 
   const onChange = async (sourceId: string, sourceIndex: number, targetIndex: number, targetId?: string) => {
     const effectiveTargetId = targetId ?? sourceId
@@ -193,7 +183,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
 
         const changedDisciplina = updatedWithIndices[targetIndex];
 
-        await debounceUpdateIndex(changedDisciplina);
+        await updateIndex(changedDisciplina);
       }
     } else {
       if (sourceId === 'disciplinas' && targetId === 'selectedDisciplinas') {
@@ -256,8 +246,10 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
           setSelectedDisciplinas(finalUpdatedTargetItems);
 
           if (savedDisciplina) {
-            await debounceUpdateIndex(savedDisciplina);
+            await updateIndex(savedDisciplina);
           }
+
+          console.log(finalUpdatedTargetItems)
 
         } catch (error) {
           console.error('Erro guardando a disciplina:', error);
@@ -299,7 +291,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
 
         const changedDisciplina = updatedWithIndices[targetIndex];
 
-        await debounceUpdateIndex(changedDisciplina);
+        await updateIndex(changedDisciplina);
       }
     }
   }
@@ -417,7 +409,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
       disciplinaToDelete.indice = updatedSelectedDisciplinas.length; 
       updatedSelectedDisciplinas.push(disciplinaToDelete); 
       
-      await debounceUpdateIndex(disciplinaToDelete);
+      await updateIndex(disciplinaToDelete);
 
       
       const finalSelectedDisciplinas = selectedDisciplinas.filter((_, i) => i !== index);
