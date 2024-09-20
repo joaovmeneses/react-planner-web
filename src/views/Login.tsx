@@ -36,7 +36,6 @@ import themeConfig from '@configs/themeConfig'
 // Hook Imports
 import { useImageVariant } from '@core/hooks/useImageVariant'
 import { useSettings } from '@core/hooks/useSettings'
-import Loading from '@/components/Loading/Loading'
 
 // Styled Custom Components
 const LoginIllustration = styled('img')(({ theme }) => ({
@@ -90,6 +89,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = { email, password }
+
     setIsLoading(true)
     api
       .post('/auth/login', data)
@@ -100,6 +100,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
       })
       .catch(error => {
         setIsLoading(false)
+
         if (error.response && error.response.status === 400 && error.response.data.message === 'Senha incorreta.') {
           setError('Email ou senha errado.')
         } else if (

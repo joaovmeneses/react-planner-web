@@ -194,6 +194,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const data = { email, password, name, last_name: lastName }
+
     setIsLoading(true)
 
     validateFields().then(() => {
@@ -208,6 +209,7 @@ const LoginV2 = ({ mode }: { mode: SystemMode }) => {
       })
       .catch(error => {
         setIsLoading(false)
+        
         if (
           error.response
        && error.response.status === 400
