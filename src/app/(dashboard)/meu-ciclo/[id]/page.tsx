@@ -18,6 +18,7 @@ import type { Disciplina, SelectedDisciplina } from '@/interfaces/meuCiclo'
 import StatusDisciplina from '@/enums/Status'
 import ModalReset from '../modalReset/ModalReset'
 import Loading from '@/components/Loading/Loading'
+import ModalTimeout from './modalTimeout/ModalTimeout'
 
 const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   const { id } = params
@@ -43,6 +44,9 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   const [reseted, setReseted] = useState<number>(0)
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const [isTimeout, setIsTimeout] = useState<boolean>(false)
+  const [isFinishModalOpen, setIsFinishModalOpen] = useState<boolean>(false)
 
   const getSystemMode = (): 'light' | 'dark' => {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -224,7 +228,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
           const newDisciplina = {
             nome: item.nome,
             horas_objetivo: 0,
-            indice: targetIndex 
+            indice: targetIndex
           };
 
           const token = localStorage.getItem('token');
@@ -238,7 +242,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
 
           const finalUpdatedTargetItems = updatedTargetItems.map(disciplina =>
             disciplina.id === tempDisciplina.id
-              ? { ...savedDisciplina } 
+              ? { ...savedDisciplina }
               : disciplina
           );
 
@@ -282,9 +286,9 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
           const config = {
               headers: { Authorization: `Bearer ${token}` }
           };
-  
+
           await api.delete(`/ciclo/${id}/disciplinas/${item.id}`, config);
-  
+
       } catch (error) {
           console.error('Erro: ', error);
       }
@@ -294,6 +298,11 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         await updateIndex(changedDisciplina);
       }
     }
+  }
+
+  const handleTimeOverflow = () => {
+    setIsTimeout(true);
+    setIsFinishModalOpen(true);
   }
 
   const handleStatusChange = (status: string, tipoEstudo?: string[]) => {
@@ -332,9 +341,16 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         disciplina => disciplina.indice === editingDisciplina.indice
       )
 
+      const nextDisciplina = updatedSelectedDisciplinas.find(
+        disciplina => disciplina.indice === editingDisciplina.indice + 1
+      )
+
       requestDisciplina && handleRequest(requestDisciplina)
       setSelectedDisciplinas(updatedSelectedDisciplinas)
+      nextDisciplina && setDisciplinaSelecionada(nextDisciplina)
       setEditingDisciplina(null)
+      setResetTimer(!resetTimer);
+      setIsTimeout(false);
     }
 
     setStatusModalOpen(false)
@@ -387,7 +403,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
 
   const handleDelete = async (index: number) => {
     try {
-      
+
       const disciplinaToDelete = selectedDisciplinas.find(disciplina => disciplina.indice === index);
 
       if (!disciplinaToDelete) {
@@ -402,20 +418,20 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         headers: { Authorization: `Bearer ${token}` }
       };
 
-      
+
       const updatedSelectedDisciplinas = [...selectedDisciplinas];
 
-      updatedSelectedDisciplinas.splice(index, 1); 
-      disciplinaToDelete.indice = updatedSelectedDisciplinas.length; 
-      updatedSelectedDisciplinas.push(disciplinaToDelete); 
-      
+      updatedSelectedDisciplinas.splice(index, 1);
+      disciplinaToDelete.indice = updatedSelectedDisciplinas.length;
+      updatedSelectedDisciplinas.push(disciplinaToDelete);
+
       await updateIndex(disciplinaToDelete);
 
-      
+
       const finalSelectedDisciplinas = selectedDisciplinas.filter((_, i) => i !== index);
       const updatedWithIndices = finalSelectedDisciplinas.map((item, i) => ({ ...item, indice: i }));
 
-      
+
       let nulo = false;
 
       if (index === disciplinaSelecionada?.indice) {
@@ -424,18 +440,18 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         nulo = true;
       }
 
-      
+
       const updatedKeys = selectedDisciplinasKeys.filter(key => key !== index);
 
       setSelectedDisciplinasKeys(updatedKeys);
 
-      
+
       setSelectedDisciplinas(updatedWithIndices);
 
-      
+
       await api.delete(`/ciclo/${id}/disciplinas/${disciplinaToDelete.id}`, config);
 
-      
+
       if (nulo && updatedWithIndices.length > 0) {
         setDisciplinaSelecionada(updatedWithIndices[0]);
       }
@@ -476,6 +492,8 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         })
 
         setReseted(reseted + 1)
+        setResetTimer(!resetTimer)
+        console.log("Tentando resetar")
       } catch (error) {
         console.error('Error resetting:', error)
       } finally {
@@ -494,14 +512,6 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
       setDisciplinaSelecionada(disciplina)
       setResetTimer(true)
     }
-  }
-
-  const handleHorasEstudadasUpdate = (id: string, novasHorasEstudadas: number) => {
-    const updatedSelectedDisciplinas = selectedDisciplinas.map(disciplina =>
-      disciplina.id === id ? { ...disciplina, horas_estudadas: novasHorasEstudadas } : disciplina
-    )
-
-    setSelectedDisciplinas(updatedSelectedDisciplinas)
   }
 
   if (!settingsContext) {
@@ -530,7 +540,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
             id={disciplinaSelecionada?.id}
             horasObjetivo={disciplinaSelecionada?.horas_objetivo}
             horasEstudadas={disciplinaSelecionada?.horas_estudadas}
-            onHorasEstudadasUpadate={handleHorasEstudadasUpdate}
+            timeOut={handleTimeOverflow}
             resetTimer={resetTimer}
           />
           <div className='p-4 rounded-lg dark:bg-dark text-light-text bg-white dark:text-dark-text'>
@@ -575,7 +585,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
                     horasEstudadas={disciplina.horas_estudadas}
                     id={disciplina.id}
                     indice={disciplina.indice}
-                    className={`bg-transparent m-2 cursor-pointer ${disciplina.id === disciplinaSelecionada?.id ? 'border-green-500' : ''}`}
+                    className={`bg-transparent m-2 cursor-pointer ${disciplina.id === disciplinaSelecionada?.id ? (isTimeout ? 'border-purple-500' : 'border-green-500') : ''}`}
                     onDelete={handleDelete}
                     onEdit={handleEdit}
                     onCheck={handleCheck}
@@ -613,6 +623,12 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
             setCanReset(false)
           }}
           onSubmit={handleReset}
+        />
+      )}
+      {isFinishModalOpen && (
+        <ModalTimeout
+          disciplina={disciplinaSelecionada?.nome as string}
+          onClose={() => setIsFinishModalOpen(false)}
         />
       )}
       {<Loading isLoading={isLoading} />}
