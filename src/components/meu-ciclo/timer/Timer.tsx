@@ -9,6 +9,7 @@ interface TimercardProps {
   horasEstudadas: number | undefined;
   timeOut: () => void;
   resetTimer: boolean;
+  isDisabled: boolean;
 }
 
 const Timercard: React.FC<TimercardProps> = ({
@@ -16,7 +17,8 @@ const Timercard: React.FC<TimercardProps> = ({
   horasObjetivo,
   horasEstudadas,
   timeOut,
-  resetTimer
+  resetTimer,
+  isDisabled  
 }: TimercardProps) => {
   const tempoInicial = 0;
 
@@ -24,6 +26,8 @@ const Timercard: React.FC<TimercardProps> = ({
   const [pausado, setPausado] = useState(true)
 
   const iniciarTimer = () => {
+    if (isDisabled) return;
+    
     setPausado(false)
     console.log(horasObjetivo)
     console.log(horasEstudadas)
@@ -52,6 +56,12 @@ const Timercard: React.FC<TimercardProps> = ({
     setPausado(true);
     console.log("Resetado")
   }, [id, resetTimer]);
+            
+  useEffect(() => {
+    if (isDisabled && !pausado) {
+      pausarTimer();
+    }
+  }, [isDisabled]);
 
   return (
     <div className='w-64 h-48 bg-light dark:bg-dark text-light-text dark:text-dark-text rounded-lg shadow-lg'>
@@ -66,18 +76,21 @@ const Timercard: React.FC<TimercardProps> = ({
           <button
             className={`${pausado ? 'bg-transparent' : 'bg-[#7367f0] bg-opacity-50'} text-base text-[#7367f0] rounded-l-lg px-4 py-1 border-[#7367f0] border-y-2 border-l-2`}
             onClick={() => {
-              if (id !== undefined) {
+              if (id !== undefined && !isDisabled) {
                 iniciarTimer();
               }
             }}
-            disabled={!pausado}
+            disabled={!pausado || isDisabled}
           >
             Ligar
           </button>
           <button
             className={`${pausado ? 'bg-[#7367f0] bg-opacity-50' : 'bg-transparent'} text-base text-[#7367f0] rounded-r-lg px-4 py-1 border-[#7367f0] border-2`}
-            onClick={() => setPausado(true)}
-            disabled={pausado}
+            onClick={() => {
+              if(id!==undefined && !isDisabled){
+              setPausado(true)}
+              }}
+            disabled={pausado || isDisabled}
           >
             Pausar
           </button>
