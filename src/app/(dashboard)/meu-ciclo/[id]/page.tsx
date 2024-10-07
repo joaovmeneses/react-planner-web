@@ -19,6 +19,7 @@ import StatusDisciplina from '@/enums/Status'
 import ModalReset from '../modalReset/ModalReset'
 import Loading from '@/components/Loading/Loading'
 import ModalTimeout from './modalTimeout/ModalTimeout'
+import { tree } from 'next/dist/build/templates/app-page'
 
 const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   const { id } = params
@@ -342,7 +343,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
       )
 
       const nextDisciplina = updatedSelectedDisciplinas.find(
-        disciplina => disciplina.indice === editingDisciplina.indice + 1
+        disciplina => disciplina.status !== StatusDisciplina.FINALIZADA
       )
 
       requestDisciplina && handleRequest(requestDisciplina)
@@ -351,6 +352,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
       setEditingDisciplina(null)
       setResetTimer(!resetTimer);
       setIsTimeout(false);
+      setCanReset(true);
     }
 
     setStatusModalOpen(false)
@@ -493,7 +495,6 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
 
         setReseted(reseted + 1)
         setResetTimer(!resetTimer)
-        console.log("Tentando resetar")
       } catch (error) {
         console.error('Error resetting:', error)
       } finally {
