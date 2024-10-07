@@ -43,6 +43,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   const [reseted, setReseted] = useState<number>(0)
 
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const getSystemMode = (): 'light' | 'dark' => {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -306,7 +307,8 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         `/disciplina/${editingDisciplina.id}`,
         {
           ...editingDisciplina,
-          qtd_questoes: disciplina?.qtd_questoes
+          qtd_questoes: disciplina?.qtd_questoes,
+          status: status
         },
         {
           headers: {
@@ -487,14 +489,43 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     handleResetRequest()
   }
 
-  const handleSelect = (indice: number) => {
-    const disciplina = selectedDisciplinas.find(disciplina => disciplina.indice === indice)
-
-    if (disciplina) {
-      setDisciplinaSelecionada(disciplina)
-      setResetTimer(true)
+  const handleSelect = async (indice: number) => {
+    const disciplinaSelecionada = selectedDisciplinas.find(disciplina => disciplina.indice === indice)
+  
+    if (disciplinaSelecionada) {
+      const token = localStorage.getItem('token')
+  
+      const disciplina = disciplinas.find(d => d.nome === disciplinaSelecionada.nome)
+  
+      try {
+        await api.put(
+          `/disciplina/${disciplinaSelecionada.id}`,
+          {
+            ...disciplinaSelecionada,
+            qtd_questoes: disciplina?.qtd_questoes,
+            status: 'finalizada' 
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+  
+        const updatedSelectedDisciplinas = selectedDisciplinas.map(d =>
+          d.indice === indice ? { ...d, status: 'finalizada' } : d
+        )
+  
+        setSelectedDisciplinas(updatedSelectedDisciplinas)
+        
+        //setDisciplinaSelecionada(disciplinaSelecionada)
+        setResetTimer(true)
+      } catch (error) {
+        console.error("Erro atualizando o status", error)
+      }
     }
   }
+  
 
   const handleHorasEstudadasUpdate = (id: string, novasHorasEstudadas: number) => {
     const updatedSelectedDisciplinas = selectedDisciplinas.map(disciplina =>
@@ -524,6 +555,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
 
   return (
     <div className={`flex space-x-4 ${getThemeClass()}`}>
+      
       <GridContextProvider onChange={onChange}>
         <div className='flex flex-col space-y-4'>
           <Timercard
@@ -532,6 +564,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
             horasEstudadas={disciplinaSelecionada?.horas_estudadas}
             onHorasEstudadasUpadate={handleHorasEstudadasUpdate}
             resetTimer={resetTimer}
+            isDisabled = {isEditMode}
           />
           <div className='p-4 rounded-lg dark:bg-dark text-light-text bg-white dark:text-dark-text'>
             <h2 className='dark:bg-dark bg-white text-[#5c55bb] text-base'>Todas as Disciplinas</h2>
@@ -542,7 +575,8 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
               placeholder='Pesquisar'
               className='w-full rounded-lg bg-light dark:bg-dark text-light-text dark:text-dark-text p-2 border border-[#373d50] focus:outline-none focus:border-[#6960da] my-4'
             />
-            <GridDropZone id='disciplinas' boxesPerRow={1} rowHeight={40} className='h-96 mb-2 overflow-y-auto'>
+            <GridDropZone id='disciplinas' boxesPerRow={1} rowHeight={40} className='h-96 mb-2 overflow-y-auto' disableDrag={!isEditMode}
+            disableDrop={!isEditMode}>
               {filteredDisciplinas.map((disciplina, index) => (
                 <GridItem key={disciplinasKeys[index]}>
                   <div
@@ -558,12 +592,24 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
           </div>
         </div>
         <div className='w-full dark:bg-dark bg-white p-4 rounded-lg'>
-          <h2 className='dark:bg-dark bg-white p-4 text-[#5c55bb] text-base'>Ciclo de estudo</h2>
+          <div className='flex justify-between dark:bg-dark bg-white p-4 text-[#5c55bb] text-base'>
+            <h2 className='pt-1'>Ciclo de estudo</h2>
+            <div className="flex justify-end">
+              <img
+                src={isEditMode ? '/images/ativado.svg' : '/images/desativado.svg'}
+                alt="Switch de edicão"
+                onClick={() => setIsEditMode(!isEditMode)}
+                className="cursor-pointer w-10 h-10"
+              />
+            </div>  
+          </div>
           <GridDropZone
             id='selectedDisciplinas'
             boxesPerRow={5}
             rowHeight={150}
             className='dark:bg-dark text-light-text bg-white dark:text-dark-text min-h-[600px] min-w-[800px]'
+            disableDrag={!isEditMode}
+            disableDrop={!isEditMode} 
           >
             {selectedDisciplinas
               .sort((a, b) => a.indice - b.indice)
@@ -575,11 +621,12 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
                     horasEstudadas={disciplina.horas_estudadas}
                     id={disciplina.id}
                     indice={disciplina.indice}
+                    status={disciplina.status}
                     className={`bg-transparent m-2 cursor-pointer ${disciplina.id === disciplinaSelecionada?.id ? 'border-green-500' : ''}`}
-                    onDelete={handleDelete}
-                    onEdit={handleEdit}
-                    onCheck={handleCheck}
-                    onSelect={handleSelect}
+                    onDelete={isEditMode ? handleDelete:null}
+                    onEdit={isEditMode ? handleEdit:null}
+                    onCheck={isEditMode ? handleCheck:null}
+                    onSelect={isEditMode ? handleSelect:null}
                   />
                 </GridItem>
               ))}
