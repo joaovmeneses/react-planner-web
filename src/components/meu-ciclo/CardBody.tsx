@@ -22,7 +22,6 @@ interface CardBodyProps {
 export default function CardBody({
   nome,
   horasObjetivo,
-  horasEstudadas,
   indice,
   status,
   className,
@@ -56,7 +55,7 @@ export default function CardBody({
           <FontAwesomeIcon icon={faCircleCheck} />
         </button>
         <h1 className='text-base font-semibold text-light-text'>{nome}</h1>
-        <h2 className='text-base text-light-text mt-2'>{converteTempo(horasObjetivo - horasEstudadas <= 0 ? 0 : horasObjetivo - horasEstudadas)}</h2>
+        <h2 className='text-base text-light-text mt-2'>{converteTempo(horasObjetivo)}</h2>
         <div className='flex justify-around w-full mt-4'>
         {onEdit && (
           <button

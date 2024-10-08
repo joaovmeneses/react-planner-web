@@ -19,7 +19,7 @@ import StatusDisciplina from '@/enums/Status'
 import ModalReset from '../modalReset/ModalReset'
 import Loading from '@/components/Loading/Loading'
 import ModalTimeout from './modalTimeout/ModalTimeout'
-import { tree } from 'next/dist/build/templates/app-page'
+
 
 const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   const { id } = params
@@ -47,7 +47,6 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const [isTimeout, setIsTimeout] = useState<boolean>(false)
   const [isFinishModalOpen, setIsFinishModalOpen] = useState<boolean>(false)
 
   const getSystemMode = (): 'light' | 'dark' => {
@@ -303,7 +302,6 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   }
 
   const handleTimeOverflow = () => {
-    setIsTimeout(true);
     setIsFinishModalOpen(true);
   }
 
@@ -353,7 +351,6 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
       nextDisciplina && setDisciplinaSelecionada(nextDisciplina)
       setEditingDisciplina(null)
       setResetTimer(!resetTimer);
-      setIsTimeout(false);
       setCanReset(true);
     }
 
@@ -537,13 +534,94 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   
         setSelectedDisciplinas(updatedSelectedDisciplinas)
         
-        //setDisciplinaSelecionada(disciplinaSelecionada)
         setResetTimer(true)
+        setIsFinishModalOpen(true);
       } catch (error) {
         console.error("Erro atualizando o status", error)
       }
     }
   }
+
+  const onUpdateHorasEstudadas = async (id: string, horas_estudadas: number) => {
+    const token = localStorage.getItem('token');
+  
+    const disciplinaSelecionada = selectedDisciplinas.find(disciplina => disciplina.id === id);
+    
+    if (disciplinaSelecionada) {
+     
+      const disciplina = disciplinas.find(d => d.nome === disciplinaSelecionada.nome);
+
+      const newStatus = disciplinaSelecionada.horas_objetivo <= horas_estudadas ? 'finalizada' : 'rodando';
+    
+      try {
+        await api.put(
+          `/disciplina/${id}`, 
+          {
+            ...disciplinaSelecionada, 
+            qtd_questoes: disciplina?.qtd_questoes, 
+            horas_estudadas, 
+            status: newStatus 
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        );
+        console.log(`Horas actualizadas para la disciplina ${id}: ${horas_estudadas}`);
+    
+        const updatedSelectedDisciplinas = selectedDisciplinas.map(d =>
+          d.id === id ? { ...d, horas_estudadas,  status: newStatus } : d
+        );
+
+        setSelectedDisciplinas(updatedSelectedDisciplinas);
+  
+      } catch (error) {
+        console.error("Erro ao atualizar horas estudadas", error);
+      }
+    }
+  };
+  
+
+  const onCompleteDisciplina = () => {
+    setDisciplinaSelecionada((prevDisciplina) => {
+      if (!prevDisciplina || prevDisciplina.indice === undefined) {
+        console.log("Sem disciplina anterior.");
+
+        return prevDisciplina;
+      }
+  
+      const nextIndex = prevDisciplina.indice + 1;
+  
+    
+      if (nextIndex < disciplinas.length) {
+        
+        return { ...prevDisciplina, indice: nextIndex };
+      } else {
+        console.log("Todas as disciplinas têm sido completadas.");
+
+        return prevDisciplina; 
+      }
+    });
+  
+    setResetTimer(true);
+  };
+  
+  
+
+  useEffect(() => {
+    const getFirstDisciplinaWithRemainingHours = (disciplinas: SelectedDisciplina[]) => {
+      return disciplinas.find(
+        disciplina => disciplina.horas_estudadas < disciplina.horas_objetivo && disciplina.status !== 'finalizada'
+      );
+    };
+  
+    const disciplinaComHorasRestantes = getFirstDisciplinaWithRemainingHours(selectedDisciplinas);
+  
+    if (disciplinaComHorasRestantes) {
+      setDisciplinaSelecionada(disciplinaComHorasRestantes);
+    }
+  }, [selectedDisciplinas]);
   
 
   if (!settingsContext) {
@@ -571,11 +649,13 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
         <div className='flex flex-col space-y-4'>
           <Timercard
             id={disciplinaSelecionada?.id}
-            horasObjetivo={disciplinaSelecionada?.horas_objetivo}
-            horasEstudadas={disciplinaSelecionada?.horas_estudadas}
+            horas_objetivo={disciplinaSelecionada?.horas_objetivo}
+            horas_estudadas={disciplinaSelecionada?.horas_estudadas}
             timeOut={handleTimeOverflow}
             resetTimer={resetTimer}
             isDisabled = {isEditMode}
+            onUpdateHorasEstudadas={onUpdateHorasEstudadas}
+            onCompleteDisciplina={onCompleteDisciplina}
           />
           <div className='p-4 rounded-lg dark:bg-dark text-light-text bg-white dark:text-dark-text'>
             <h2 className='dark:bg-dark bg-white text-[#5c55bb] text-base'>Todas as Disciplinas</h2>
@@ -632,9 +712,8 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
                     horasEstudadas={disciplina.horas_estudadas}
                     id={disciplina.id}
                     indice={disciplina.indice}
-
                     status={disciplina.status}
-                    className={`bg-transparent m-2 cursor-pointer ${disciplina.id === disciplinaSelecionada?.id ? (isTimeout ? 'border-purple-500' : 'border-green-500') : ''}`}
+                    className={`bg-transparent m-2 cursor-pointer ${disciplina.id === disciplinaSelecionada?.id ? (disciplina.status == 'finalizada' ? 'border-gray-400' : 'border-green-500') : ''}`}
                     onDelete={isEditMode ? handleDelete:null}
                     onEdit={isEditMode ? handleEdit:null}
                     onCheck={isEditMode ? handleCheck:null}

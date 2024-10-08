@@ -8,7 +8,7 @@ interface ModalTimeoutProps {
 const ModalTimeout = ({ disciplina, onClose }: ModalTimeoutProps) => {
 
   useEffect(() => {
-    let interval = setTimeout(() => {
+    const interval = setTimeout(() => {
       onClose()
     }, 3000)
 

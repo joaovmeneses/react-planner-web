@@ -1,65 +1,98 @@
 'use client'
 
-import { SelectedDisciplina } from '@/interfaces/meuCiclo';
 import React, { useState, useEffect } from 'react'
 
 interface TimercardProps {
   id: string | undefined;
-  horasObjetivo: number | undefined;
-  horasEstudadas: number | undefined;
+  horas_objetivo: number | undefined;
+  horas_estudadas: number | undefined;
   timeOut: () => void;
   resetTimer: boolean;
   isDisabled: boolean;
+  onCompleteDisciplina: () => void;
+  onUpdateHorasEstudadas: (id: string, horasEstudadas: number) => void;
 }
 
 const Timercard: React.FC<TimercardProps> = ({
   id,
-  horasObjetivo,
-  horasEstudadas,
+  horas_objetivo,
+  horas_estudadas,
   timeOut,
   resetTimer,
-  isDisabled  
+  isDisabled,
+  onCompleteDisciplina,
+  onUpdateHorasEstudadas  
 }: TimercardProps) => {
   const tempoInicial = 0;
 
   const [tempoRestante, setTempoRestante] = useState(tempoInicial)
+  const [tempoAtualizar, setTempoAtualizar] = useState(tempoInicial)
   const [pausado, setPausado] = useState(true)
+  const [incrementoEstudo, setIncrementoEstudo] = useState(0); 
 
   const iniciarTimer = () => {
     if (isDisabled) return;
-    
-    setPausado(false)
-    console.log(horasObjetivo)
-    console.log(horasEstudadas)
-    console.log(tempoRestante)
+    setPausado(false);
+    setIncrementoEstudo(0);
   }
 
   useEffect(() => {
-    let temporizador: string | number | NodeJS.Timeout | undefined
-
+    let temporizador: NodeJS.Timeout | undefined;
+  
     if (!pausado) {
       temporizador = setInterval(() => {
-        setTempoRestante(tempoAnterior => tempoAnterior! + 1)
-      }, 1000)
+        // Verifica si se han completado las horas objetivo antes de hacer cualquier otra cosa
+        if (horas_objetivo && horas_estudadas! + incrementoEstudo >= horas_objetivo) {
+          clearInterval(temporizador);
+          if (id) onUpdateHorasEstudadas(id, horas_estudadas! + incrementoEstudo);
+          onCompleteDisciplina();
+          timeOut();
+          
+          return; // Salir del ciclo del intervalo inmediatamente si ya se cumplió el objetivo
+        }
+  
+        // Si no se ha alcanzado el objetivo, sigue con el incremento normal
+        setTempoRestante((tempoAnterior) => tempoAnterior! + 1);
+        setIncrementoEstudo((prev) => prev + 1);
+        setTempoAtualizar((tempoAnterior) => tempoAnterior + 1);
+  
+        // Verifica si han pasado 10 segundos para actualizar
+        if (tempoAtualizar >= 10) {
+          if (id) {
+            onUpdateHorasEstudadas(id, horas_estudadas! + incrementoEstudo);
+            setIncrementoEstudo(0); // Resetear el contador de incremento
+          }
 
-      if(horasObjetivo && tempoRestante == horasObjetivo)
-      {
-        timeOut();
+          setTempoAtualizar(0); // Reiniciar el contador para el próximo ciclo
+        }
+      }, 1000); // Intervalo de 1 segundo
+    }
+  
+    return () => clearInterval(temporizador);
+  }, [pausado, horas_estudadas, horas_objetivo, incrementoEstudo, tempoAtualizar, id]);
+  
+  
+  
+  const pausarTimer = () => {
+    if (id !== undefined && !isDisabled) {
+      setPausado(true);
+
+      if (id) {
+        onUpdateHorasEstudadas(id, horas_estudadas! + incrementoEstudo); 
+        setIncrementoEstudo(0); 
       }
     }
-
-    return () => clearInterval(temporizador)
-  }, [pausado, tempoRestante])
+  };
 
   useEffect(() => {
     setTempoRestante(tempoInicial);
     setPausado(true);
-    console.log("Resetado")
+    console.log("Cronómetro reset")
   }, [id, resetTimer]);
-            
+
   useEffect(() => {
     if (isDisabled && !pausado) {
-      pausarTimer();
+      setPausado(true);
     }
   }, [isDisabled]);
 
@@ -86,10 +119,7 @@ const Timercard: React.FC<TimercardProps> = ({
           </button>
           <button
             className={`${pausado ? 'bg-[#7367f0] bg-opacity-50' : 'bg-transparent'} text-base text-[#7367f0] rounded-r-lg px-4 py-1 border-[#7367f0] border-2`}
-            onClick={() => {
-              if(id!==undefined && !isDisabled){
-              setPausado(true)}
-              }}
+            onClick={() => pausarTimer()}
             disabled={pausado || isDisabled}
           >
             Pausar
@@ -100,4 +130,4 @@ const Timercard: React.FC<TimercardProps> = ({
   )
 }
 
-export default Timercard
+export default Timercard;
