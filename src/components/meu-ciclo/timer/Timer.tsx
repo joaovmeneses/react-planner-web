@@ -21,24 +21,29 @@ const Timercard: React.FC<TimercardProps> = ({
   resetTimer,
   isDisabled,
   onCompleteDisciplina,
-  onUpdateHorasEstudadas  
+  onUpdateHorasEstudadas
 }: TimercardProps) => {
   const tempoInicial = 0;
 
+  const [timeFloor, setTimeFloor] = useState(0)
+  const [startUpdateTime, setStartUpdateTime] = useState(0)
+  const [startTime, setStartTime] = useState(Math.floor(Date.now() / 1000))
   const [tempoRestante, setTempoRestante] = useState(tempoInicial)
   const [tempoAtualizar, setTempoAtualizar] = useState(tempoInicial)
   const [pausado, setPausado] = useState(true)
-  const [incrementoEstudo, setIncrementoEstudo] = useState(0); 
+  const [incrementoEstudo, setIncrementoEstudo] = useState(0);
 
   const iniciarTimer = () => {
     if (isDisabled) return;
     setPausado(false);
     setIncrementoEstudo(0);
+    setStartTime(Math.floor(Date.now() / 1000))
+    setStartUpdateTime(Math.floor(Date.now() / 1000))
   }
 
   useEffect(() => {
     let temporizador: NodeJS.Timeout | undefined;
-  
+
     if (!pausado) {
       temporizador = setInterval(() => {
         // Verifica si se han completado las horas objetivo antes de hacer cualquier otra cosa
@@ -47,39 +52,43 @@ const Timercard: React.FC<TimercardProps> = ({
           if (id) onUpdateHorasEstudadas(id, horas_estudadas! + incrementoEstudo);
           onCompleteDisciplina();
           timeOut();
-          
+
           return; // Salir del ciclo del intervalo inmediatamente si ya se cumplió el objetivo
         }
-  
+
+        const curTime = Math.floor(Date.now() / 1000)
+        const elapsedTime = (curTime - startTime!) + timeFloor
+
         // Si no se ha alcanzado el objetivo, sigue con el incremento normal
-        setTempoRestante((tempoAnterior) => tempoAnterior! + 1);
+        setTempoRestante(elapsedTime);
         setIncrementoEstudo((prev) => prev + 1);
-        setTempoAtualizar((tempoAnterior) => tempoAnterior + 1);
-  
+        setTempoAtualizar((curTime - startUpdateTime!));
+
         // Verifica si han pasado 10 segundos para actualizar
         if (tempoAtualizar >= 10) {
           if (id) {
             onUpdateHorasEstudadas(id, horas_estudadas! + incrementoEstudo);
             setIncrementoEstudo(0); // Resetear el contador de incremento
           }
-
           setTempoAtualizar(0); // Reiniciar el contador para el próximo ciclo
+          setStartUpdateTime(Math.floor(Date.now() / 1000))
         }
       }, 1000); // Intervalo de 1 segundo
     }
-  
+
     return () => clearInterval(temporizador);
   }, [pausado, horas_estudadas, horas_objetivo, incrementoEstudo, tempoAtualizar, id]);
-  
-  
-  
+
+
+
   const pausarTimer = () => {
     if (id !== undefined && !isDisabled) {
       setPausado(true);
+      setTimeFloor(tempoRestante)
 
       if (id) {
-        onUpdateHorasEstudadas(id, horas_estudadas! + incrementoEstudo); 
-        setIncrementoEstudo(0); 
+        onUpdateHorasEstudadas(id, horas_estudadas! + incrementoEstudo);
+        setIncrementoEstudo(0);
       }
     }
   };
@@ -87,6 +96,7 @@ const Timercard: React.FC<TimercardProps> = ({
   useEffect(() => {
     setTempoRestante(tempoInicial);
     setPausado(true);
+    setTimeFloor(0)
     console.log("Cronómetro reset")
   }, [id, resetTimer]);
 
