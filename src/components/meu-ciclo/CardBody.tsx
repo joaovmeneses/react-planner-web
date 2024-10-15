@@ -3,7 +3,7 @@
 import React from 'react'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCog, faTrash, faCheck, faCircleCheck } from '@fortawesome/free-solid-svg-icons'
+import { faCog, faTrash, faCircleCheck } from '@fortawesome/free-solid-svg-icons'
 
 interface CardBodyProps {
   nome: string
@@ -15,7 +15,6 @@ interface CardBodyProps {
   className?: string
   onDelete: ((indice: number) => void) | null;
   onEdit: ((indice: number) => void) | null;
-  onCheck: ((indice: number) => void) | null;
   onSelect: ((indice: number) => void) | null;
 }
 
@@ -27,7 +26,6 @@ export default function CardBody({
   className,
   onDelete,
   onEdit,
-  onCheck,
   onSelect
 }: CardBodyProps) {
   const formatNumber = (num: number): string => {
@@ -49,7 +47,7 @@ export default function CardBody({
       <div className='flex flex-col items-center'>
         <button
           onClick={() => onSelect?.(indice)}
-          className={`absolute w-fit h-fit self-end mt-5 mr-3 top-0 right-0 bg-transparent p-1 rounded-sm ${onSelect ? 'text-[#28c76f] hover:bg-[#28c76f] hover:bg-opacity-50' : 'text-gray-400'}`}
+          className={`absolute w-fit h-fit self-end mt-5 mr-3 top-0 right-0 bg-transparent p-1 rounded-sm ${status == 'finalizada' ? 'text-[#28c76f] hover:bg-[#28c76f] hover:bg-opacity-50' : 'text-gray-400'}`}
           disabled={!onSelect} 
         >
           <FontAwesomeIcon icon={faCircleCheck} />
@@ -72,15 +70,6 @@ export default function CardBody({
             className='bg-transparent p-2 text-[#28c76f] hover:bg-[#28c76f] hover:bg-opacity-50'
           >
             <FontAwesomeIcon icon={faTrash} />
-          </button>
-        )}
-
-        {onCheck && (
-          <button
-            onClick={() => onCheck(indice)}
-            className='bg-transparent p-2 text-[#28c76f] hover:bg-[#28c76f] hover:bg-opacity-50'
-          >
-            <FontAwesomeIcon icon={faCheck} />
           </button>
         )}
         </div>
