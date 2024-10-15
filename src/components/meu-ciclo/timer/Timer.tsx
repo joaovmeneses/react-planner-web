@@ -9,6 +9,7 @@ interface TimercardProps {
   timeOut: () => void;
   resetTimer: boolean;
   isDisabled: boolean;
+  status: string | undefined;
   onCompleteDisciplina: () => void;
   onUpdateHorasEstudadas: (id: string, horasEstudadas: number) => void;
 }
@@ -20,6 +21,7 @@ const Timercard: React.FC<TimercardProps> = ({
   timeOut,
   resetTimer,
   isDisabled,
+  status,
   onCompleteDisciplina,
   onUpdateHorasEstudadas
 }: TimercardProps) => {
@@ -46,34 +48,34 @@ const Timercard: React.FC<TimercardProps> = ({
 
     if (!pausado) {
       temporizador = setInterval(() => {
-        // Verifica si se han completado las horas objetivo antes de hacer cualquier otra cosa
-        if (horas_objetivo && horas_estudadas! + incrementoEstudo >= horas_objetivo) {
+        
+        if (status == "finalizado") {
           clearInterval(temporizador);
           if (id) onUpdateHorasEstudadas(id, horas_estudadas! + incrementoEstudo);
           onCompleteDisciplina();
           timeOut();
 
-          return; // Salir del ciclo del intervalo inmediatamente si ya se cumplió el objetivo
+          return;
         }
 
         const curTime = Math.floor(Date.now() / 1000)
         const elapsedTime = (curTime - startTime!) + timeFloor
 
-        // Si no se ha alcanzado el objetivo, sigue con el incremento normal
         setTempoRestante(elapsedTime);
         setIncrementoEstudo((prev) => prev + 1);
         setTempoAtualizar((curTime - startUpdateTime!));
 
-        // Verifica si han pasado 10 segundos para actualizar
+        
         if (tempoAtualizar >= 10) {
           if (id) {
             onUpdateHorasEstudadas(id, horas_estudadas! + incrementoEstudo);
-            setIncrementoEstudo(0); // Resetear el contador de incremento
+            setIncrementoEstudo(0);
           }
-          setTempoAtualizar(0); // Reiniciar el contador para el próximo ciclo
+
+          setTempoAtualizar(0); 
           setStartUpdateTime(Math.floor(Date.now() / 1000))
         }
-      }, 1000); // Intervalo de 1 segundo
+      }, 1000); 
     }
 
     return () => clearInterval(temporizador);

@@ -470,14 +470,14 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     }
   }
 
-  const handleCheck = (index: number) => {
-    const disciplinaToEdit = selectedDisciplinas.find(disciplina => disciplina.indice === index)
+  // const handleCheck = (index: number) => {
+  //   const disciplinaToEdit = selectedDisciplinas.find(disciplina => disciplina.indice === index)
 
-    if (disciplinaToEdit) {
-      setEditingDisciplina(disciplinaToEdit)
-      setStatusModalOpen(true)
-    }
-  }
+  //   if (disciplinaToEdit) {
+  //     setEditingDisciplina(disciplinaToEdit)
+  //     setStatusModalOpen(true)
+  //   }
+  // }
 
   const handleReset = () => {
     setIsLoading(true)
@@ -511,6 +511,9 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     if (disciplinaSelecionada) {
       const token = localStorage.getItem('token')
   
+
+      setEditingDisciplina(disciplinaSelecionada)
+      setStatusModalOpen(true)
       const disciplina = disciplinas.find(d => d.nome === disciplinaSelecionada.nome)
   
       try {
@@ -550,8 +553,6 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
     if (disciplinaSelecionada) {
      
       const disciplina = disciplinas.find(d => d.nome === disciplinaSelecionada.nome);
-
-      const newStatus = disciplinaSelecionada.horas_objetivo <= horas_estudadas ? 'finalizada' : 'rodando';
     
       try {
         await api.put(
@@ -560,7 +561,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
             ...disciplinaSelecionada, 
             qtd_questoes: disciplina?.qtd_questoes, 
             horas_estudadas, 
-            status: newStatus 
+            status: 'rodando' 
           },
           {
             headers: {
@@ -568,10 +569,10 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
             }
           }
         );
-        console.log(`Horas actualizadas para la disciplina ${id}: ${horas_estudadas}`);
+        console.log(`Horas atualizadas para a disciplina ${id}: ${horas_estudadas}`);
     
         const updatedSelectedDisciplinas = selectedDisciplinas.map(d =>
-          d.id === id ? { ...d, horas_estudadas,  status: newStatus } : d
+          d.id === id ? { ...d, horas_estudadas,  status: 'rodando' } : d
         );
 
         setSelectedDisciplinas(updatedSelectedDisciplinas);
@@ -610,13 +611,13 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
   
 
   useEffect(() => {
-    const getFirstDisciplinaWithRemainingHours = (disciplinas: SelectedDisciplina[]) => {
+    const getPrimeiraDisciplinaNaoFinalizada = (disciplinas: SelectedDisciplina[]) => {
       return disciplinas.find(
-        disciplina => disciplina.horas_estudadas < disciplina.horas_objetivo && disciplina.status !== 'finalizada'
+        disciplina => disciplina.status !== 'finalizada'
       );
     };
   
-    const disciplinaComHorasRestantes = getFirstDisciplinaWithRemainingHours(selectedDisciplinas);
+    const disciplinaComHorasRestantes = getPrimeiraDisciplinaNaoFinalizada(selectedDisciplinas);
   
     if (disciplinaComHorasRestantes) {
       setDisciplinaSelecionada(disciplinaComHorasRestantes);
@@ -654,6 +655,7 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
             timeOut={handleTimeOverflow}
             resetTimer={resetTimer}
             isDisabled = {isEditMode}
+            status={disciplinaSelecionada?.status}
             onUpdateHorasEstudadas={onUpdateHorasEstudadas}
             onCompleteDisciplina={onCompleteDisciplina}
           />
@@ -716,7 +718,6 @@ const MeuCiclo: React.FC<{ params: { id: string } }> = ({ params }) => {
                     className={`bg-transparent m-2 cursor-pointer ${disciplina.id === disciplinaSelecionada?.id ? (disciplina.status == 'finalizada' ? 'border-gray-400' : 'border-green-500') : ''}`}
                     onDelete={isEditMode ? handleDelete:null}
                     onEdit={isEditMode ? handleEdit:null}
-                    onCheck={isEditMode ? handleCheck:null}
                     onSelect={isEditMode ? handleSelect:null}
                   />
                 </GridItem>
